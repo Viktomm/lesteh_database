@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit admins</title>
+</head>
+<body>
+
+<div th:each="admin : ${admins}">
+    <a th:href="@{edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
+</div>
+
+<br> <a href="/admin/new">Добавить администратора</a>
+</body>
+</html>
