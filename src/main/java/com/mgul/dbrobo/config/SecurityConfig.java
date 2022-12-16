@@ -26,7 +26,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/admin/**", "/api/v1/**").authenticated();
+                    auth.requestMatchers("/admin/**").authenticated();
                     auth.anyRequest().permitAll();
                 })
                 .formLogin().defaultSuccessUrl("/admin").failureUrl("/login?error").and()
