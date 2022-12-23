@@ -6,15 +6,18 @@ import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.repositories.DeviceRepository;
 import com.mgul.dbrobo.repositories.EntryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class EntryService {
@@ -31,12 +34,21 @@ public class EntryService {
         return entryRepository.findAll();
     }
 
-    public void insertOne(Map<String, Map<String,String>> entryData){
+    public void insertOne(LinkedHashMap<String, LinkedHashMap<String,String>> entryData){
+        Entry entry = new Entry();
+        LinkedHashMap<String,String> newEntryData = new LinkedHashMap<>();
         Optional<Device> device = deviceRepository.findByAkey(entryData.get("system").get("Akey"));
         if (device.isPresent()) {
+            entryData.get("system").remove("Akey");
             String deviceName = device.get().getName();
-            entryData.remove("system");
-            Entry entry = new Entry();
+            String deviceSerial = device.get().getSerial();
+            for(String key: entryData.keySet()){
+                Map<String,String> value = entryData.get(key);
+                for(String innerKey: value.keySet()) {
+                    newEntryData.put(key+"_"+innerKey,value.get(innerKey));
+                }
+            }
+            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             //TODO:боже пофиксите кто-нибудь эту дату, я не  умею((
             if (entryData.containsKey("RTC")) {
                 try {
@@ -45,15 +57,19 @@ public class EntryService {
                     for (int i = 0; i < 6; i++) {
                         dates[i]=Integer.valueOf(stringOfDates[i]);
                     }
-                    entry.setCreatedAt(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]));
+                    entry.setDateForCalculation(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]));
+                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]))));
                 } catch (Exception e) {
-                    entry.setCreatedAt(LocalDateTime.now());
+                    entry.setDateForCalculation(LocalDateTime.now());
+                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now())));
                 }
             } else {
-                entry.setCreatedAt(LocalDateTime.now());
+                entry.setDateForCalculation(LocalDateTime.now());
+                entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now())));
             }
-            entry.setDeviceName(deviceName);
-            entry.setData(entryData);
+            entry.setuName(deviceName);
+            entry.setSerial(deviceSerial);
+            entry.setData(newEntryData);
             entryRepository.insert(entry);
         }
         else
@@ -66,5 +82,20 @@ public class EntryService {
     public List<Entry> firstTenEntries() {
         return entryRepository.findAll(PageRequest.of(0,2,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
+    }
+
+    public Map<String,Entry> getDataBetween(LocalDateTime fdate,LocalDateTime sdate){
+        List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);
+        LinkedHashMap<String,Entry> result = new LinkedHashMap<>();
+        for(Entry entry:fromDb) {
+            try {
+                Method getId = entry.getClass().getDeclaredMethod("getIdNotForSpring");
+                getId.setAccessible(true);
+                result.put((String)getId.invoke(entry),entry);
+            } catch (Exception e) {
+                throw new RuntimeException("Кто-то сломал рефлексию =(");
+            }
+        }
+        return result;
     }
 }

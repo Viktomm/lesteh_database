@@ -14,5 +14,5 @@ public interface EntryRepository extends MongoRepository<Entry,String> {
     Page<Entry> findAll(Pageable pageable);
 
     //Возможно рабочая заготовка под отображение
-    List<Entry> findByCreatedAtBetween(LocalDateTime start,LocalDateTime end);
+    List<Entry> findByDateForCalculationBetween(LocalDateTime start,LocalDateTime end);
 }

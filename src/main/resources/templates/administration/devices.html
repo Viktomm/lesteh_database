@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<center>
+    <p>
+    </p><div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
+    <form th:method="POST" th:action="" th:object="device">
+        <label> Добавить новый прибор<br> </label>
+        <input name="uname" type="text" placeholder="Введите наименование" required=""><br>
+        <input name="userial" type="text" placeholder="Введите серийный ключ" required=""><br>
+        <input name="uakey" type="text" placeholder="Введите ключ доступа" required=""><br>
+        <input name="ux" type="text" placeholder="Введите координату X" required=""><br>
+        <input name="uy" type="text" placeholder="Введите координату Y" required=""><br>
+        <input name="uidobj" type="text" placeholder="Введите ID объекта" required=""><br>
+        <input name="uidop" type="text" placeholder="Введите ID оператора" required=""><br>
+        <input type="submit" name="gotadd" value="Добавить"><br>
+    </form>
+</div>
+    <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
+        <form method="POST" action="">
+            <label> Обновить данные<br> </label>
+            <input name="updid" type="text" placeholder="Введите ID прибора" required=""><br>
+            <input name="updname" type="text" placeholder="Введите новое имя"><br>
+            <input name="updx" type="text" placeholder="Введите новую координату X"><br>
+            <input name="updy" type="text" placeholder="Введите новую координату Y"><br>
+            <input name="updobj" type="text" placeholder="Введите ID нового объекта"><br>
+            <input name="updop" type="text" placeholder="Введите ID нового оператора"><br>
+            <input type="submit" name="gotdel" value="Обновить"><br>
+        </form>
+    </div>
+    <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
+        <form method="POST" action="">
+            <label> Удалить прибор из базы<br> </label>
+            <input name="udel" type="text" placeholder="Введите ID"><br>
+            <input type="submit" name="gotdel" value="Удалить"><br>
+        </form>
+    </div>
+    <p></p>
+</center>
+</body>
+</html>

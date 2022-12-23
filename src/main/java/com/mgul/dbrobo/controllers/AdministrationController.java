@@ -1,10 +1,10 @@
 package com.mgul.dbrobo.controllers;
 
 import com.mgul.dbrobo.models.Admin;
+import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.services.AdminService;
+import com.mgul.dbrobo.services.DeviceService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin")
 public class AdministrationController {
     private final AdminService adminService;
+    private final DeviceService deviceService;
 
     @Autowired
-    public AdministrationController(AdminService adminService) {
+    public AdministrationController(AdminService adminService, DeviceService deviceService) {
         this.adminService = adminService;
+        this.deviceService = deviceService;
     }
 
     @GetMapping("/edit")
@@ -53,5 +55,11 @@ public class AdministrationController {
     public String deleteSomeone(@PathVariable String id) {
         adminService.delete(id);
         return "redirect:/admin/edit";
+    }
+
+    @PostMapping("/pribor")
+    public String addNewDevice(@ModelAttribute("device") Device device) {
+        deviceService.save(device);
+        return "redirect:/admin/pribor";
     }
 }
