@@ -14,12 +14,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.Formatter;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/core")
@@ -49,19 +47,19 @@ public class DataController {
 
     @GetMapping(value = "/deb.php", params = {"fdate", "sdate"})
     @ResponseBody
-    public Map<String, Entry> getDataBetween(@RequestParam(value = "fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date fdate,
-                                             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date sdate) {
-        return entryService.getDataBetween(fdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime(), sdate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+    public Map<String, Entry> getDataBetween(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
+                                             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
+        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(), sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 
     @GetMapping(value = "/deb.php", params = {"fdate", "sdate", "fileback"})
-    public String getDataBetweenInFile(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date fdate,
-                                       @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date sdate,
+    public String getDataBetweenInFile(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
+                                       @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate,
                                        @RequestParam(value = "fileback") String fileback,
                                        Model model) {
-        DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        model.addAttribute("fdate", format.format(fdate));
-        model.addAttribute("sdate", format.format(sdate));
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        model.addAttribute("fdate", dtf.format(fdate));
+        model.addAttribute("sdate", dtf.format(sdate));
         return "apifileback";
     }
 

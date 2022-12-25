@@ -84,7 +84,7 @@ public class EntryService {
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
-    public Map<String,Entry> getDataBetween(LocalDateTime fdate,LocalDateTime sdate){
+    public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate){
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);
         LinkedHashMap<String,Entry> result = new LinkedHashMap<>();
         for(Entry entry:fromDb) {
