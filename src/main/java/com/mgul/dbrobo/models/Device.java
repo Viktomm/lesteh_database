@@ -1,40 +1,44 @@
 package com.mgul.dbrobo.models;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
 @Document(collection = "devices")
 public class Device {
+    @Transient
+    public static final String SEQUENCE_NAME = "devices_sequence";
     @Id
-    private String id;
+    private long id;
 
+    @Field("uName")
     private String name;
+    private String serial;
     @Field("Akey")
     private String akey;
 
-    private String serial;
 
     @Field("X")
-    private String x;
+    private double x;
 
     @Field("Y")
-    private String y;
+    private double y;
 
     @Field("Object")
     private String object;
 
     @Field("ObjectId")
-    private String objectId;
+    private long objId;
 
     @Field("Removed")
-    private Boolean removed;
+    private int removed;
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 
@@ -62,19 +66,19 @@ public class Device {
         this.serial = serial;
     }
 
-    public String getX() {
+    public double getX() {
         return x;
     }
 
-    public void setX(String x) {
+    public void setX(double x) {
         this.x = x;
     }
 
-    public String getY() {
+    public double getY() {
         return y;
     }
 
-    public void setY(String y) {
+    public void setY(double y) {
         this.y = y;
     }
 
@@ -86,19 +90,19 @@ public class Device {
         this.object = object;
     }
 
-    public String getObjectId() {
-        return objectId;
+    public long getObjId() {
+        return objId;
     }
 
-    public void setObjectId(String objectId) {
-        this.objectId = objectId;
+    public void setObjId(long objId) {
+        this.objId = objId;
     }
 
-    public Boolean getRemoved() {
+    public int getRemoved() {
         return removed;
     }
 
-    public void setRemoved(Boolean removed) {
+    public void setRemoved(int removed) {
         this.removed = removed;
     }
 }

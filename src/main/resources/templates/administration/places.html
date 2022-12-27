@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>objects</title>
+</head>
+<body>
+<a href="/admin">
+  <input type="submit" value="Назад">
+</a>
+<center>
+  <div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
+    <form th:method="POST" th:action="@{objects}" th:object="${place}">
+      <label>
+        Добавить новый объект <br>
+      </label>
+      <input type="text" placeholder="Введите наименование " th:field="*{name}"> <br>
+      <input type="submit" value="Добавить">
+    </form>
+  </div>
+
+  <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
+    <form th:method="DELETE" th:action="@{objects}" th:object="${place}">
+      <label>
+        Удалить объект из базы <br>
+      </label>
+      <input type="text" placeholder="Введите Id" id = "id" name = "id"> <br>
+      <input type="submit" value="Удалить">
+    </form>
+  </div>
+
+<br>  <div style="font-size: xx-large">
+  Список объектов:
+</div> <br>
+
+  <div th:if="${ not#lists.isEmpty(objects)}" style="font-size: larger">
+    <table>
+      <tr>
+        <th>Id</th>
+        <th>Название объекта</th>
+      </tr>
+      <tr th:each="object : ${objects}">
+        <td th:text="${object.getId()}"></td>
+        <td th:text="${object.getName()}"></td>
+      </tr>
+      </table>
+  </div>
+
+</center>
+</body>
+</html>

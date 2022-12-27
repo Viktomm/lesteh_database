@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<center>
+    <form th:method="POST" th:action="@{insert}">
+        Введите данные в формате JSON: <br>
+        <input type="text" placeholder="Введите сюда JSON с данными приборов" style="width: 500px">
+        <input type="submit" value="Отправить">
+    </form>
+</center>
+</body>
+</html>

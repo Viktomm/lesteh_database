@@ -6,13 +6,15 @@
 </head>
 <body>
 
-<form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" th:object="${admin}">
+<form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" >
   <label for="username">Введите username</label>
-  <input type="text" th:field="*{username}" id="username"> <br>
-  <label for="password">Введите пароль</label>
-  <input type="password" th:field="*{password}" id="password"><br>
+  <input type="text" th:field="${admin.username}" id="username"> <br>
+  <label for="password">Введите старый пароль</label>
+  <input type="password" id="oldPass" name="oldPass"><br>
+  <label for="password">Введите новый пароль</label>
+  <input type="password" th:field="${admin.password}" id="password"><br>
   <label for="fio">Введите ФИО</label>
-  <input type="text" th:field="*{fio}" id="fio">
+  <input type="text" th:field="${admin.fio}" id="fio">
   <br>
   <input type="submit" value="Изменить">
 </form>

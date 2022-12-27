@@ -1,6 +1,7 @@
 package com.mgul.dbrobo.services;
 
 import com.mgul.dbrobo.exceptions.AdminNotFoundException;
+import com.mgul.dbrobo.exceptions.WrongPasswordException;
 import com.mgul.dbrobo.models.Admin;
 import com.mgul.dbrobo.repositories.AdminRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +40,9 @@ public class AdminService {
     }
 
     @Transactional
-    public void update(String id, Admin newAdminData) {
+    public void update(String id, Admin newAdminData,String oldPass) {
         Admin a = adminRepository.findById(id).get();
+        if (!a.getPassword().equals(oldPass)) throw new WrongPasswordException("Wrong password");
         if (newAdminData.getUsername()!=null) a.setUsername(newAdminData.getUsername());
         if (!newAdminData.getPassword().isEmpty()) a.setPassword(newAdminData.getPassword());
         if (newAdminData.getFio()!=null) a.setFio(newAdminData.getFio());

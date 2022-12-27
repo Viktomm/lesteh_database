@@ -35,6 +35,10 @@ public class EntryService {
     }
 
     public void insertOne(LinkedHashMap<String, LinkedHashMap<String,String>> entryData){
+        entryRepository.insert(transformation(entryData));
+    }
+
+    private Entry transformation(LinkedHashMap<String, LinkedHashMap<String, String>> entryData) {
         Entry entry = new Entry();
         LinkedHashMap<String,String> newEntryData = new LinkedHashMap<>();
         Optional<Device> device = deviceRepository.findByAkey(entryData.get("system").get("Akey"));
@@ -52,7 +56,7 @@ public class EntryService {
             //TODO:боже пофиксите кто-нибудь эту дату, я не  умею((
             if (entryData.containsKey("RTC")) {
                 try {
-                    String[] stringOfDates = (entryData.get("RTC").get("date")+":"+entryData.get("RTC").get("time")).split("[:-]");
+                    String[] stringOfDates = (entryData.get("RTC").get("date")+":"+ entryData.get("RTC").get("time")).split("[:-]");
                     Integer[] dates = new Integer[6];
                     for (int i = 0; i < 6; i++) {
                         dates[i]=Integer.valueOf(stringOfDates[i]);
@@ -70,12 +74,20 @@ public class EntryService {
             entry.setuName(deviceName);
             entry.setSerial(deviceSerial);
             entry.setData(newEntryData);
-            entryRepository.insert(entry);
+            return entry;
         }
         else
             throw new WrongAKeyException("There's no device with such aKey");
-
     }
+
+    public void insertMany(List<LinkedHashMap<String, LinkedHashMap<String, String>>> allData){
+        List<Entry> entries = new ArrayList<>();
+        for(LinkedHashMap<String, LinkedHashMap<String, String>> singleData:allData) {
+            entries.add(transformation(singleData));
+        }
+        entryRepository.insert(entries);
+    }
+
 
     //TODO:Тут запрос клоунский, его бы переписать через SQL
     //я его конечно переделал, но кажись он всё ещё клоунский :(

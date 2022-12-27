@@ -7,4 +7,8 @@ import java.util.Optional;
 
 public interface DeviceRepository extends MongoRepository<Device,String> {
     Optional<Device> findByAkey(String Akey);
+
+    Optional<Device> findById(long id);
+
+    Optional<Device> findByName(String name);
 }
