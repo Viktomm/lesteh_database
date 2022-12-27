@@ -1,20 +1,26 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Update</title>
 </head>
 <body>
-
+<a href="/admin">
+    <input type="submit" value="Назад">
+</a>
 <form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" >
   <label for="username">Введите username</label>
   <input type="text" th:field="${admin.username}" id="username"> <br>
-  <label for="password">Введите старый пароль</label>
-  <input type="password" id="oldPass" name="oldPass"><br>
   <label for="password">Введите новый пароль</label>
   <input type="password" th:field="${admin.password}" id="password"><br>
   <label for="fio">Введите ФИО</label>
-  <input type="text" th:field="${admin.fio}" id="fio">
+  <input type="text" th:field="${admin.fio}" id="fio"> <br>
+    <label for="role">Выберите роль</label>
+    <select th:field="*{admin.role}" id="role">
+        <option th:each="role : ${roles}"
+                th:value="${role}"
+                th:text="${role}">Wireframe</option>
+    </select>
   <br>
   <input type="submit" value="Изменить">
 </form>

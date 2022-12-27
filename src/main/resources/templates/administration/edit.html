@@ -9,8 +9,21 @@
     <input type="submit" value="Назад">
 </a>
 <center>
-    <div th:each="admin : ${admins}">
-        <a th:href="@{edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
+    <div>
+        <table>
+            <tr>
+                <th>ФИО пользователя</th>
+                <th>Роль пользователя</th>
+            </tr>
+            <tr th:each="admin : ${admins}">
+                <td>
+                    <a th:href="@{edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
+                </td>
+                <td th:text="${admin.getRole()}">
+
+                </td>
+            </tr>
+        </table>
     </div>
 <br> <a href="/admin/new">Добавить администратора</a>
 </center>

@@ -11,6 +11,8 @@ public class Admin {
     private String password;
     private String fio;
 
+    private String role;
+
     public String getId() {
         return id;
     }
@@ -41,5 +43,13 @@ public class Admin {
 
     public void setFio(String fio) {
         this.fio = fio;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

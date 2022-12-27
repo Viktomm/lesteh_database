@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 
 
 @Configuration
@@ -26,12 +27,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/admin/**").authenticated();
+                    auth.requestMatchers("/admin/edit/**").hasRole("ADMIN");
+                    auth.requestMatchers("/admin/devices/**","/admin/objects/**").hasAnyRole("ADMIN","MODERATOR");
+                    auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
                 .formLogin().defaultSuccessUrl("/admin").failureUrl("/login?error").and()
                 .logout().logoutUrl("/logout")
-                .logoutSuccessUrl("/").and()
+                .logoutSuccessUrl("/")
+                .and()
+                .exceptionHandling().accessDeniedPage("/admin/accessDenied")
+                .and()
                 .userDetailsService(adminDetailsService)
                 .headers(headers->headers.frameOptions().sameOrigin())
                 .httpBasic(Customizer.withDefaults())

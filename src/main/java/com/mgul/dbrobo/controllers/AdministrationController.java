@@ -10,6 +10,7 @@ import com.mgul.dbrobo.services.AdminService;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
 import com.mgul.dbrobo.services.generators.SequenceGeneratorService;
+import com.mgul.dbrobo.utils.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -51,25 +52,26 @@ public class AdministrationController {
     @GetMapping("/edit/{id}")
     public String editSomeone(Model model,@PathVariable String id) {
         model.addAttribute(adminService.findById(id));
+        model.addAttribute("roles", Roles.values());
         return "/administration/update";
     }
 
     @GetMapping("/new")
-    public String newPage(@ModelAttribute("admin") Admin admin) {
+    public String newPage(@ModelAttribute("admin") Admin admin,Model model) {
+        model.addAttribute("roles", Roles.values());
         return "/administration/new";
     }
 
     @PostMapping("/edit")
-    public String createAdmin(@ModelAttribute("admin") Admin admin) {
+    public String createAdmin(@ModelAttribute("admin") Admin admin, Model model){
         adminService.save(admin);
         return "redirect:/admin/edit";
     }
 
     @PatchMapping("/edit/{id}")
     public String updateSomeone(@PathVariable String id,
-                                        @ModelAttribute("admin") Admin admin,
-                                @ModelAttribute("oldPass") String oldPass) {
-        adminService.update(id,admin,oldPass);
+                                        @ModelAttribute("admin") Admin admin) {
+        adminService.update(id,admin);
         return "redirect:/admin/edit";
     }
 
@@ -152,5 +154,11 @@ public class AdministrationController {
     @ResponseBody
     public ResponseEntity getCalibration() {
         return ResponseEntity.ok(calibrationRepository.findAll());
+    }
+
+
+    @GetMapping("/accessDenied")
+    public String getAccessDeniedPage() {
+        return "administration/accessDenied";
     }
 }
