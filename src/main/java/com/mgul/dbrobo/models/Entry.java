@@ -21,6 +21,7 @@ public class Entry {
 
     private LocalDateTime dateForCalculation;
 
+    @Field("uName")
     private String uName;
 
     private String serial;

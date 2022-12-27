@@ -93,16 +93,16 @@ public class EntryService {
 
 
     public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate) {
-        LinkedHashMap<String,Entry> result = (LinkedHashMap<String, Entry>) getDataBetween(fdate, sdate);
+        List<Entry> result = entryRepository.findByDateForCalculationBetween(fdate,sdate);
+
         ObjectMapper mapper = new ObjectMapper();
         JsonNode jsonTree = mapper.valueToTree(result);
 
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
         JsonNode firstObject = jsonTree.elements().next();
-        firstObject.fieldNames().forEachRemaining(fieldName -> {
-            csvSchemaBuilder.addColumn(fieldName);
-        });
+        firstObject.fieldNames().forEachRemaining(csvSchemaBuilder::addColumn);
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+
         try {
             CsvMapper csvMapper = new CsvMapper();
             csvMapper.writerFor(JsonNode.class)

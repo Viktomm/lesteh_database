@@ -9,6 +9,7 @@ public class Device {
     @Id
     private String id;
 
+    @Field("uName")
     private String name;
     @Field("Akey")
     private String akey;
