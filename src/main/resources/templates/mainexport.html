@@ -1,14 +1,27 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Export page</title>
 </head>
 <body>
 
-<a href="http://localhost:8080/core/deb.php?fdate=2019-02-17%2011:01:00&sdate=2023-02-17%2012:01:00" download="log.txt">
-    Скачать
-</a>
+<form th:action="@{/core/deb.php}"  th:object="${time}" th:method="get">
+    <div>
+        <label for="date from">Выберите начало временного интервала</label>
+        <input type="datetime-local" th:field="*{fdate}" id="date from"/>
+    </div>
+    <br>
+    <div>
+        <label for="date to">Выберите конец временного интервала</label>
+        <input type="datetime-local" th:field="*{sdate}" id="date to"/>
+    </div>
+    <br>
+    <div>
+        <button type="submit" class="button">Скачать</button>
+    </div>
 
+</form>
+<br>
 </body>
 </html>

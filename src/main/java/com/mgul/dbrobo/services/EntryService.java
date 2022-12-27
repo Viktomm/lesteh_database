@@ -1,17 +1,23 @@
 package com.mgul.dbrobo.services;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.repositories.DeviceRepository;
 import com.mgul.dbrobo.repositories.EntryRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.lang.reflect.InvocationTargetException;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.DateFormat;
@@ -84,7 +90,31 @@ public class EntryService {
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
-    public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate){
+
+
+    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate) {
+        LinkedHashMap<String,Entry> result = (LinkedHashMap<String, Entry>) getDataBetween(fdate, sdate);
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode jsonTree = mapper.valueToTree(result);
+
+        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
+        JsonNode firstObject = jsonTree.elements().next();
+        firstObject.fieldNames().forEachRemaining(fieldName -> {
+            csvSchemaBuilder.addColumn(fieldName);
+        });
+        CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+        try {
+            CsvMapper csvMapper = new CsvMapper();
+            csvMapper.writerFor(JsonNode.class)
+                    .with(csvSchema)
+                    .writeValue(new File("src/main/resources/log.csv"), jsonTree);
+        } catch (IOException ex) {
+            throw new RuntimeException();
+        }
+        return new File("src/main/resources/log.csv");
+    }
+
+    public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);
         LinkedHashMap<String,Entry> result = new LinkedHashMap<>();
         for(Entry entry:fromDb) {

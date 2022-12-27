@@ -6,9 +6,16 @@
 </head>
 <body>
 
-<a th:href="@{/core/deb.php(fdate=${fdate},sdate=${sdate})}" download="log.txt">
-  Скачать
-</a>
-
+<button>
+    <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}">Посмотреть в браузере</a>
+</button>
+<br><br>
+<button>
+    <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}" download="log.txt" >Скачать json</a>
+</button>
+<br><br>
+<button>
+    <a href="http://localhost:8080/core/deb.php?fdate=2019-02-17%2011:01:00&sdate=2023-02-17%2012:01:00" download="log.csv">Скачать csv</a>
+</button>
 </body>
 </html>
