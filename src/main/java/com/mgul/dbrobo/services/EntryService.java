@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.services;
 
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -17,12 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -92,27 +95,63 @@ public class EntryService {
 
 
 
-    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate) {
+    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
         List<Entry> result = entryRepository.findByDateForCalculationBetween(fdate,sdate);
 
+        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
-        JsonNode jsonTree = mapper.valueToTree(result);
-
-        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
-        JsonNode firstObject = jsonTree.elements().next();
-        firstObject.fieldNames().forEachRemaining(csvSchemaBuilder::addColumn);
+        Entry entryFirst = result.stream().findAny().get();
+        JsonNode jsonTree = mapper.valueToTree(entryFirst);
+        JsonNode jsonNodeData = jsonTree.get("data");
+        csvSchemaBuilder.addColumn("date");
+        jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
-
-        try {
-            CsvMapper csvMapper = new CsvMapper();
-            csvMapper.writerFor(JsonNode.class)
+        CsvMapper csvMapper = new CsvMapper();
+        try (FileWriter writer = new FileWriter("src/main/resources/log.csv")) {
+            String headers = csvMapper
+                    .writerFor(JsonNode.class)
                     .with(csvSchema)
-                    .writeValue(new File("src/main/resources/log.csv"), jsonTree);
-        } catch (IOException ex) {
-            throw new RuntimeException();
+                    .writeValueAsString(null);
+
+            writer.write(String.format("Pribor: ;%s;Interval: ;%s; / ;%s;\n", deviceName,
+                    fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                    sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            writer.write(headers);
+        } catch (IOException ex) {throw new RuntimeException();}
+
+
+        for (Entry entry : result) {
+            jsonTree = mapper.valueToTree(entry);
+            jsonNodeData = jsonTree.get("data");
+            String str1;
+            String str2;
+            try {
+                str1 = csvMapper
+                        .configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true)
+                        .writerFor(JsonNode.class)
+                        .with(csvSchema.withoutHeader())
+                        .writeValueAsString(jsonTree);
+                str2 = csvMapper
+                        .writerFor(JsonNode.class)
+                        .with(csvSchema.withoutHeader())
+                        .writeValueAsString(jsonNodeData);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+
+            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", true)) {
+                writer.write(str1.replaceAll(";", "").replaceAll("\n", "") + str2.replaceAll("\\.", ","));
+            } catch (IOException ex) {throw new RuntimeException();}
         }
+
         return new File("src/main/resources/log.csv");
     }
+
+
+
+
+
+
 
     public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);

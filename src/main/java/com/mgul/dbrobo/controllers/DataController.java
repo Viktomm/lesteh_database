@@ -71,7 +71,7 @@ public class DataController {
     @GetMapping(value = "/deb.php/log.csv", params = {"fdate", "sdate"}, produces = "text/csv")
     public ResponseEntity loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")  LocalDateTime sdate) {
-        File file = entryService.getDataBetweenCSV(fdate, sdate);
+        File file = entryService.getDataBetweenCSV(fdate, sdate, "Тест студии");
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
                 .contentLength(file.length())
