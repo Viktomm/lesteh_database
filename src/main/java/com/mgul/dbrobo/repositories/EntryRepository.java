@@ -15,4 +15,5 @@ public interface EntryRepository extends MongoRepository<Entry,String> {
 
     //Возможно рабочая заготовка под отображение
     List<Entry> findByDateForCalculationBetween(LocalDateTime start,LocalDateTime end);
+    List<Entry> findByuNameAndDateForCalculationBetween(String uName, LocalDateTime start,LocalDateTime end);
 }

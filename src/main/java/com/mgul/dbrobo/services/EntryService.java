@@ -96,7 +96,7 @@ public class EntryService {
 
 
     public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
-        List<Entry> result = entryRepository.findByDateForCalculationBetween(fdate,sdate);
+        List<Entry> result = entryRepository.findByuNameAndDateForCalculationBetween(deviceName, fdate, sdate);
 
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
