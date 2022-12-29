@@ -8,26 +8,19 @@ import org.springframework.data.mongodb.core.mapping.Field;
 public class Device {
     @Id
     private String id;
-
     @Field("uName")
     private String name;
     @Field("Akey")
     private String akey;
-
     private String serial;
-
     @Field("X")
     private String x;
-
     @Field("Y")
     private String y;
-
     @Field("Object")
     private String object;
-
     @Field("ObjectId")
     private String objectId;
-
     @Field("Removed")
     private Boolean removed;
 

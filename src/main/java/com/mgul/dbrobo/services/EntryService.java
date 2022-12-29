@@ -83,7 +83,6 @@ public class EntryService {
         }
         else
             throw new WrongAKeyException("There's no device with such aKey");
-
     }
 
     //TODO:Тут запрос клоунский, его бы переписать через SQL
@@ -113,7 +112,7 @@ public class EntryService {
                     .with(csvSchema)
                     .writeValueAsString(null);
 
-            writer.write(String.format("Pribor: ;%s;Interval: ;%s; / ;%s;\n", deviceName,
+            writer.write(String.format("Прибор: ;%s;Интервал: ;%s; / ;%s;\n", deviceName,
                     fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                     sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
             writer.write(headers);
@@ -140,7 +139,8 @@ public class EntryService {
             }
 
             try (FileWriter writer = new FileWriter("src/main/resources/log.csv", true)) {
-                writer.write(str1.replaceAll(";", "").replaceAll("\n", "") + str2.replaceAll("\\.", ","));
+                writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
+                        + str2.replaceAll("\\.", ","));
             } catch (IOException ex) {throw new RuntimeException();}
         }
 
@@ -162,7 +162,7 @@ public class EntryService {
                 getId.setAccessible(true);
                 result.put((String)getId.invoke(entry),entry);
             } catch (Exception e) {
-                throw new RuntimeException("Кто-то сломал рефлексию =(");
+                throw new RuntimeException("Reflection error");
             }
         }
         return result;

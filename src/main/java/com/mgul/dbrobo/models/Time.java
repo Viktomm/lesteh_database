@@ -7,11 +7,23 @@ public class Time {
     private LocalDateTime sdate;
     private String fileback;
 
-    public Time(LocalDateTime fdate, LocalDateTime sdate, String fileback) {
+    private String deviceName;
+
+    public String getDeviceName() {
+        return deviceName;
+    }
+
+    public void setDeviceName(String deviceName) {
+        this.deviceName = deviceName;
+    }
+
+    public Time(LocalDateTime fdate, LocalDateTime sdate, String fileback, String deviceName) {
         this.fdate = fdate;
         this.sdate = sdate;
         this.fileback = fileback;
+        this.deviceName = deviceName;
     }
+
 
     public LocalDateTime getFdate() {
         return fdate;

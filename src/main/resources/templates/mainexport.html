@@ -17,6 +17,11 @@
         <input type="datetime-local" th:field="*{sdate}" id="date to"/>
     </div>
     <br>
+    <label for="dropDownList">(Для выдачи csv)Выберите прибор:</label>
+    <select class="form-control" id="dropDownList" th:field="*{deviceName}">
+        <option th:each="device : ${devices}" th:value="${device.getName()}" th:text="${device.getName()}"></option>
+    </select>
+    <br>
     <div>
         <button type="submit" class="button">Скачать</button>
     </div>

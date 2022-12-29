@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 public class DeviceService {
     private final DeviceRepository deviceRepository;
@@ -14,6 +16,8 @@ public class DeviceService {
     public DeviceService(DeviceRepository deviceRepository) {
         this.deviceRepository = deviceRepository;
     }
+
+    public List<Device> findAll() { return deviceRepository.findAll();}
 
     @Transactional
     public void save(Device device) {
