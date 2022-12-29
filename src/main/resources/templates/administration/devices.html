@@ -3,6 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+        datalist {
+            position: absolute;
+            background-color: white;
+            border: 1px solid black;
+            border-radius: 0 0 5px 5px;
+            border-top: none;
+            font-family: sans-serif;
+            width: 165px;
+            padding: 5px;
+            max-height: 10rem;
+            overflow-y: auto
+
+        }
+
+        option {
+            background-color: white;
+            padding: 4px;
+            margin-bottom: 1px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        option:hover,  .active{
+            background-color: lightblue;
+        }
+
+    </style>
 </head>
 <body>
 <a href="/admin">
@@ -19,7 +47,8 @@
             <input type="text" placeholder="Введите ключ доступа " th:field="*{akey}"> <br>
             <input type="text" placeholder="Введите координату Х " th:field="*{x}"> <br>
             <input type="text" placeholder="Введите координату У " th:field="*{y}"> <br>
-            <input type="text" placeholder="Введите Id объекта " id = "objId1" name = "objId"> <br>
+            <input placeholder="Выберите объект размещения" list="" name="object" id="object1" autocomplete="off"> <br>
+            <datalist id="objects"></datalist>
             <input type="submit" value="Добавить">
         </form>
     </div>
@@ -35,7 +64,8 @@
             <input type="text" placeholder="Введите новый ключ доступа " th:field="*{akey}"> <br>
             <input type="text" placeholder="Введите новую координату Х " th:field="*{x}"> <br>
             <input type="text" placeholder="Введите новую координату У " th:field="*{y}"> <br>
-            <input type="text" placeholder="Введите новый Id объекта " id = "objId2" name = "objId"> <br>
+            <input placeholder="Выберите новый объект размещения" list="" name="object" id="object2" autocomplete="off"> <br>
+            <datalist id="objects2"></datalist>
             <input type="submit" value="Обновить">
         </form>
     </div>
@@ -55,10 +85,32 @@
     <br>  <div style="font-size: xx-large">
     Список приборов:
 </div> <br>
-
+        <label for="nameinput">Поиск по имени</label>
+        <input type="text" id="nameinput" placeholder="Search..." title="Type in something">
+    <div>
+        <label for="serialinput">Поиск по серийному ключу</label>
+        <input type="text" id="serialinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="xinput">Поиск по Х координате</label>
+        <input type="text" id="xinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="yinput">Поиск по У координате</label>
+        <input type="text" id="yinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="objectinput">Поиск по объекту</label>
+        <input type="text" id="objectinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="removedinput">Фильтр по состоянию удаления</label>
+        <input type="text" id="removedinput" placeholder="Search..." title="Type in something">
+    </div>
+    <br>
     <div th:if="${ not#lists.isEmpty(devices)}" style="font-size: larger">
         <table>
-            <tr>
+            <thead><tr>
                 <th>Id</th>
                 <th>Наименование</th>
                 <th>Серийный ключ</th>
@@ -66,23 +118,176 @@
                 <th>X</th>
                 <th>Y</th>
                 <th>Название объекта</th>
-                <th>Id объекта</th>
                 <th>Удалён ли?</th>
             </tr>
-            <tr th:each="dev : ${devices}">
-                <td th:text="${dev.getId()}"></td>
-                <td th:text="${dev.getName()}"></td>
-                <td th:text="${dev.getSerial()}"></td>
-                <td th:text="${dev.getAkey()}"></td>
-                <td th:text="${dev.getX()}"></td>
-                <td th:text="${dev.getY()}"></td>
-                <td th:text="${dev.getObject()}"></td>
-                <td th:text="${dev.getObjId()}"></td>
-                <td th:text="${dev.getRemoved()}"></td>
+            </thead>
+            <tbody id="mytable">
+            <tr>
             </tr>
+            </tbody>
         </table>
     </div>
 
 </center>
+<script>
+    let table = document.getElementById('mytable')
+    let nameinput = document.getElementById('nameinput')
+    let serilalinput = document.getElementById('serialinput')
+    let xinput = document.getElementById('xinput')
+    let yinput = document.getElementById('yinput')
+    let objectinput = document.getElementById('objectinput')
+    let removedinput = document.getElementById('removedinput')
+    const xhttp = new XMLHttpRequest()
+    xhttp.open("GET", "/admin/devices/get", false)
+    xhttp.send()
+    let tableData = JSON.parse(xhttp.response)
+    xhttp.open("GET","/admin/objects/get",false)
+    xhttp.send()
+    let objectsData = JSON.parse(xhttp.response)
+    for(let object of objectsData) {
+        let node = document.createElement("option")
+        node.value=object.name
+        node.appendChild(document.createTextNode(object.name))
+        document.getElementById("objects").appendChild(node)
+        let node2 = document.createElement("option")
+        node2.value=object.name
+        node2.appendChild(document.createTextNode(object.name))
+        document.getElementById("objects2").appendChild(node2)
+    }
+
+
+    function populateTable() {
+        table.innerHTML = '';
+        for (let data of tableData) {
+            let row = table.insertRow(-1);
+            let id = row.insertCell(0);
+            id.innerHTML = data.id;
+            let name = row.insertCell(1);
+            name.innerHTML = data.name;
+            let serial = row.insertCell(2);
+            serial.innerHTML = data.serial;
+            let akey = row.insertCell(3);
+            akey.innerHTML = data.akey;
+            let x = row.insertCell(4);
+            x.innerHTML = data.x;
+            let y = row.insertCell(5);
+            y.innerHTML = data.y;
+            let object = row.insertCell(6);
+            object.innerHTML = data.object;
+            let removed = row.insertCell(7);
+            removed.innerHTML = data.removed;
+        }
+
+
+
+        filterTable();
+    }
+
+
+    function filterTable() {
+        let namefilter = nameinput.value.toUpperCase();
+        let serialfilter = serilalinput.value.toUpperCase();
+        let xfilter = xinput.value.toUpperCase();
+        let yfilter = yinput.value.toUpperCase();
+        let objectfilter = objectinput.value.toUpperCase();
+        let removedfilter = removedinput.value.toUpperCase();
+        let rows = table.getElementsByTagName("TR");
+        let flag = false;
+
+        for (let row of rows) {
+            let cells = row.getElementsByTagName("TD");
+            if (cells.item(1).textContent.toUpperCase().indexOf(namefilter)>-1
+            && cells.item(2).textContent.toUpperCase().indexOf(serialfilter)>-1
+            && cells.item(4).textContent.toUpperCase().indexOf(xfilter)>-1
+            && cells.item(5).textContent.toUpperCase().indexOf(yfilter)>-1
+            && cells.item(6).textContent.toUpperCase().indexOf(objectfilter)>-1
+            && cells.item(7).textContent.toUpperCase().indexOf(removedfilter)>-1) {
+                flag=true;
+            }
+            if (namefilter.length===0  && serialfilter.length===0  && xfilter.length===0  && yfilter.length===0  && objectfilter.length===0  && removedfilter.length===0) {
+                flag=true;
+            }
+
+
+            if (flag) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+
+            flag = false;
+        }
+    }
+
+
+    populateTable();
+
+    nameinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    serilalinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    xinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    yinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    objectinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    removedinput.addEventListener('keyup', function(event) {
+        filterTable();
+    });
+    let object1 = document.getElementById("object1")
+    let object2 = document.getElementById("object2")
+    let objects = document.getElementById("objects")
+    let objects2 = document.getElementById("objects2")
+    console.log(objects)
+    console.log(objects2)
+    object1.oninput = function() {
+        let text = object1.value.toUpperCase();
+        for (let option of objects.options) {
+            if(option.value.toUpperCase().indexOf(text) > -1){
+                option.style.display = "block";
+            }else{
+                option.style.display = "none";
+            }
+        };
+    }
+    object1.onfocus = function () {
+        objects.style.display = 'block';
+        object1.style.borderRadius = "5px 5px 0 0";
+    };
+    for (let option of objects.options) {
+        option.onclick = function () {
+            object1.value = option.value;
+            objects.style.display = 'none';
+            object1.style.borderRadius = "5px";
+        }
+    };
+    object2.oninput = function() {
+        let text = object2.value.toUpperCase();
+        for (let option of objects2.options) {
+            if(option.value.toUpperCase().indexOf(text) > -1){
+                option.style.display = "block";
+            }else{
+                option.style.display = "none";
+            }
+        };
+    }
+    object2.onfocus = function () {
+        objects2.style.display = 'block';
+        object2.style.borderRadius = "5px 5px 0 0";
+    };
+    for (let option of objects2.options) {
+        option.onclick = function () {
+            object2.value = option.value;
+            objects2.style.display = 'none';
+            object2.style.borderRadius = "5px";
+        }
+    };
+</script>
 </body>
 </html>

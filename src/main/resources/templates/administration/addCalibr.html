@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Add new calibration</title>
+</head>
+<body>
+<form th:method="PUT" th:action="@{calibration}" th:object="${dto}" >
+    <input type="hidden" th:field="*{name}">
+    <input type="hidden" th:field="*{sensor}">
+    <input type="text" th:field="*{n}"> <br>
+    <input type="text" th:field="*{ai[0]}"> <br>
+    <input type="text" th:field="*{ai[1]}"> <br>
+    <input type="text" th:field="*{ai[2]}"> <br>
+    <input type="text" th:field="*{ai[3]}"> <br>
+    <input type="text" th:field="*{ai[4]}"> <br>
+    <input type="text" th:field="*{ai[5]}"> <br>
+    <input type="text" th:field="*{ai[6]}"> <br>
+    <input type="submit" value="Внести">
+</form>
+</body>
+</html>

@@ -2,9 +2,102 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Calibration</title>
 </head>
 <body>
-
+<a href="/admin">
+    <input type="submit" value="Назад">
+</a>
+<center>
+    <select id="unitid" name="unitid" required>
+        <option>---</option>
+    </select> <br>
+    <label id="test">Название прибора</label>
+    <table>
+        <thead><tr>
+            <th>Датчик</th>
+            <th>Дата и время</th>
+            <th>n</th>
+            <th>a0</th>
+            <th>a1</th>
+            <th>a2</th>
+            <th>a3</th>
+            <th>a4</th>
+            <th>a5</th>
+            <th>a6</th>
+        </tr>
+        </thead>
+        <tbody id="mytable">
+        <tr>
+        </tr>
+        </tbody>
+    </table>
+</center>
 </body>
+<script>
+    let table = document.getElementById("mytable")
+    let xhttp = new XMLHttpRequest()
+    let unit = document.getElementById("unitid")
+    xhttp.open("GET","/admin/devices/get",false)
+    xhttp.send()
+    let devices = JSON.parse(xhttp.response)
+    xhttp.open("GET","/admin/calibration/get",false)
+    xhttp.send()
+    let calibrationData = JSON.parse(xhttp.response)
+    console.log(calibrationData)
+    for(let device of devices) {
+        let node = document.createElement("option")
+        node.value=device.id
+        node.appendChild(document.createTextNode(device.name+"::"+device.serial))
+        document.getElementById("unitid").appendChild(node)
+    }
+    unit.onchange = function () {
+        document.getElementById("test").textContent= unit.options[unit.selectedIndex].text.replace("::"," ");
+        xhttp=new XMLHttpRequest()
+        xhttp.open("GET","/admin/devices?uid="+unit.options[unit.selectedIndex].value,false)
+        xhttp.send()
+        let sensors = JSON.parse(xhttp.responseText)
+        table.innerHTML=''
+        for(let sensor of sensors) {
+            let row = table.insertRow(-1);
+            let name = row.insertCell(0);
+            let link = document.createElement("a")
+            link.appendChild(document.createTextNode(sensor))
+            link.href = `/admin/calibration?name=${unit.options[unit.selectedIndex].text}&sensor=${sensor}`
+            name.appendChild(link)
+            let flag=false;
+            for(let cal of calibrationData) {
+                if (cal.uName+" "+cal.serial===unit.options[unit.selectedIndex].text.replace("::"," ")) {
+                    for(let s of cal.sensors) {
+                        if (s.sensor === sensor) {
+                            let calibr = s.calibr;
+                            calibr.sort(function(a,b){
+                                return new Date(b.datetime) - new Date(a.datetime);
+                            });
+                            for(let c of calibr) {
+                                if (flag === true) {
+                                    row = table.insertRow(-1);
+                                    let name = row.insertCell(0);
+                                    let link = document.createElement("a")
+                                    link.appendChild(document.createTextNode(sensor))
+                                    link.href = `/admin/calibration?name=${unit.options[unit.selectedIndex].text}&sensor=${sensor}`
+                                    name.appendChild(link)
+                                }
+                                let date = row.insertCell(1);
+                                date.innerHTML=c.datetime;
+                                let n = row.insertCell(2);
+                                n.innerHTML = c.data.n;
+                                for(let i=0;i<c.data.ai.length;i++) {
+                                    let ai = row.insertCell(3+i);
+                                    ai.innerHTML=c.data.ai[i];
+                                }
+                                flag=true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+</script>
 </html>

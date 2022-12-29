@@ -1,22 +1,23 @@
 package com.mgul.dbrobo.controllers;
 
-import com.mgul.dbrobo.models.Admin;
-import com.mgul.dbrobo.models.Calibration;
-import com.mgul.dbrobo.models.Device;
-import com.mgul.dbrobo.models.Place;
+import com.mgul.dbrobo.models.*;
 import com.mgul.dbrobo.repositories.CalibrationRepository;
 import com.mgul.dbrobo.repositories.PlaceRepository;
 import com.mgul.dbrobo.services.AdminService;
+import com.mgul.dbrobo.services.CalibrationService;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
 import com.mgul.dbrobo.services.generators.SequenceGeneratorService;
 import com.mgul.dbrobo.utils.Roles;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
@@ -33,14 +34,17 @@ public class AdministrationController {
 
     private final EntryService entryService;
 
+    private final CalibrationService calibrationService;
+
     @Autowired
-    public AdministrationController(AdminService adminService, DeviceService deviceService, PlaceRepository placeRepository, SequenceGeneratorService sequenceGeneratorService, CalibrationRepository calibrationRepository, EntryService entryService) {
+    public AdministrationController(AdminService adminService, DeviceService deviceService, PlaceRepository placeRepository, SequenceGeneratorService sequenceGeneratorService, CalibrationRepository calibrationRepository, EntryService entryService, CalibrationService calibrationService) {
         this.adminService = adminService;
         this.deviceService = deviceService;
         this.placeRepository = placeRepository;
         this.sequenceGeneratorService = sequenceGeneratorService;
         this.calibrationRepository = calibrationRepository;
         this.entryService = entryService;
+        this.calibrationService = calibrationService;
     }
 
     @GetMapping("/edit")
@@ -93,15 +97,30 @@ public class AdministrationController {
     }
 
     @GetMapping("/devices")
-    public String getDevices(@ModelAttribute("device") Device device,Model model) {
+    //@ResponseBody
+    public String getDevices(HttpServletResponse httpServletResponse, @ModelAttribute("device") Device device, Model model) {
         model.addAttribute("devices",deviceService.findAll());
+        httpServletResponse.setContentType("application/javascript");
         return "administration/devices";
+        //return ResponseEntity.ok(deviceService.findAll());
+    }
+
+    @GetMapping(value = "/devices",params = {"uid"})
+    public ResponseEntity getSensorsList(@RequestParam Long uid) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Access-Control-Allow-Origin","*");
+        headers.add("Access-Control-Allow-Credentials","true");
+        return ResponseEntity.ok().headers(headers).body(deviceService.getSensorsList(uid));
+    }
+
+    @GetMapping("/devices/get")
+    public ResponseEntity getDevices() {
+        return ResponseEntity.ok(deviceService.findAll());
     }
 
     @PostMapping("/devices")
     public String addNewDevice(@ModelAttribute("device") Device device) {
         device.setId(sequenceGeneratorService.generateSequence(Device.SEQUENCE_NAME));
-        device.setObject(placeRepository.findById(device.getObjId()).get().getName());
         deviceService.save(device);
         return "redirect:/admin/devices";
     }
@@ -123,6 +142,10 @@ public class AdministrationController {
         model.addAttribute("objects",placeRepository.findAll());
         return "administration/places";
     }
+    @GetMapping("/objects/get")
+    public ResponseEntity getPlacesForJs() {
+        return ResponseEntity.ok(placeRepository.findAll());
+    }
 
     @PostMapping("/objects")
     public String addPlace(@ModelAttribute("place") Place place) {
@@ -138,11 +161,12 @@ public class AdministrationController {
     }
 
 
-    @PostMapping("/calibration")
-    public String addCalibration(@RequestBody Calibration calibration) {
-        calibrationRepository.insert(calibration);
-        return "redirect:/";
+    @PutMapping("/calibration")
+    public String addCalibration(@ModelAttribute("dto") CalibrationDTO calibrationDTO) {
+        calibrationService.save(calibrationDTO);
+        return "redirect:/admin/calibration";
     }
+
 
     @PostMapping("/multiplecalibration")
     public String addCalibration(@RequestBody List<Calibration> calibrations) {
@@ -151,12 +175,98 @@ public class AdministrationController {
     }
 
     @GetMapping("/calibration")
-    @ResponseBody
-    public ResponseEntity getCalibration() {
-        return ResponseEntity.ok(calibrationRepository.findAll());
+    public String getCalibration() {
+        return "administration/calibr";
     }
 
+    @GetMapping(value = "/calibration",params = {"name","sensor"})
+    public String addCalibration(@RequestParam String name, @RequestParam String sensor, Model model) {
+//        Calibration calibration;
+//        if (calibrationRepository.findByuNameAndSerial(name.split(" ")[0],name.split(" ")[1]).isEmpty()) {
+//            calibration = new Calibration();
+//            calibration.setuName(name.split(" ")[0]);
+//            calibration.setSerial(name.split(" ")[1]);
+//            ArrayList<Sensor> sensors = new ArrayList<>();
+//            Sensor sensorToAdd=new Sensor();
+//            sensorToAdd.setSensor(sensor);
+//            ArrayList<Calibr> calibrs = new ArrayList<>();
+//            Calibr calibr = new Calibr();
+//            calibr.setDatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+//            CalibrData calibrData = new CalibrData();
+//            ArrayList<Double> ai = new ArrayList<>();
+//            for (int i = 0; i < 8; i++) {
+//                ai.add(0.0);
+//            }
+//            calibrData.setAi(ai);
+//            calibr.setData(calibrData);
+//            calibrs.add(calibr);
+//            sensorToAdd.setCalibr(calibrs);
+//            sensors.add(sensorToAdd);
+//            calibration.setSensors(sensors);
+//            model.addAttribute("calibration",calibration);
+//        } else {
+//            calibration = calibrationRepository.findByuNameAndSerial(name.split(" ")[0],name.split(" ")[1]).get();
+//            ArrayList<Sensor> sensors = calibration.getSensors();
+//            Sensor sensor1 = null;
+//            if (sensors==null) {
+//                sensors = new ArrayList<>();
+//            }
+//            for(Sensor s:sensors) {
+//                if (s.getSensor().equals(sensor)) {
+//                    sensor1=s;
+//                    break;
+//                }
+//            }
+//            if (sensor1==null) {
+//                sensor1=new Sensor();
+//                sensor1.setSensor(sensor);
+//                sensors.add(sensor1);
+//            }
+//            ArrayList<Calibr> calibrs;
+//            if (sensor1.getCalibr()!=null) {
+//                calibrs=sensor1.getCalibr();
+//            } else {
+//                calibrs = new ArrayList<>();
+//                sensor1.setCalibr(calibrs);
+//            }
+//            Calibr calibr = new Calibr();
+//            calibr.setDatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
+//            CalibrData calibrData = new CalibrData();
+//            ArrayList<Double> ai = new ArrayList<>();
+//            for (int i = 0; i < 8; i++) {
+//                ai.add(0.0);
+//            }
+//            calibrData.setAi(ai);
+//            calibr.setData(calibrData);
+//            calibrs.add(calibr);
+//            calibration.setSensors(sensors);
+//            System.out.println(calibration);
+//            model.addAttribute("calibration",calibration);
+//        }
+//        ArrayList<Sensor> sensors = calibration.getSensors();
+//        for(Sensor s:sensors) {
+//            if (s.getSensor().equals(sensor)) {
+//                model.addAttribute("sensor",sensors.indexOf(s));
+//                model.addAttribute("ind",sensors.get(sensors.indexOf(s)).getCalibr().size()-1);
+//                break;
+//            }
+//        }
+        CalibrationDTO calibrationDTO = new CalibrationDTO();
+        calibrationDTO.setName(name);
+        calibrationDTO.setSensor(sensor);
+        List<Double> ai = new ArrayList<>();
+        for (int i = 0; i < 8; i++) {
+                ai.add(0.0);
+            }
+        calibrationDTO.setAi(ai);
+        model.addAttribute("dto",calibrationDTO);
+        return "administration/addCalibr";
+    }
 
+    @GetMapping("/calibration/get")
+    public ResponseEntity getCalibrData() {
+        return ResponseEntity.ok(calibrationRepository.findAll());
+    }
     @GetMapping("/accessDenied")
     public String getAccessDeniedPage() {
         return "administration/accessDenied";

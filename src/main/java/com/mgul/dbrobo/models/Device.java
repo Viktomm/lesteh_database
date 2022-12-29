@@ -28,8 +28,6 @@ public class Device {
     @Field("Object")
     private String object;
 
-    @Field("ObjectId")
-    private long objId;
 
     @Field("Removed")
     private int removed;
@@ -88,14 +86,6 @@ public class Device {
 
     public void setObject(String object) {
         this.object = object;
-    }
-
-    public long getObjId() {
-        return objId;
-    }
-
-    public void setObjId(long objId) {
-        this.objId = objId;
     }
 
     public int getRemoved() {

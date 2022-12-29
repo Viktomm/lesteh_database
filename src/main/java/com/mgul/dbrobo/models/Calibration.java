@@ -51,4 +51,14 @@ public class Calibration {
     public void setSensors(ArrayList<Sensor> sensors) {
         this.sensors = sensors;
     }
+
+    @Override
+    public String toString() {
+        return "Calibration{" +
+                "id='" + id + '\'' +
+                ", uName='" + uName + '\'' +
+                ", serial='" + serial + '\'' +
+                ", sensors=" + sensors +
+                '}';
+    }
 }
