@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form th:object="${time}" th:action="@{/core/deb.php/log.csv}" th:method="get">
+    <input type="hidden" name="fdate" th:value="${fdate}">
+    <input type="hidden" name="sdate" th:value="${sdate}">
+    <label for="dropDownList">Выберите прибор:</label>
+    <select id="dropDownList" th:name="deviceName">
+        <option th:each="device : ${devices}" th:value="${device.getName()}" th:text="${device.getName()}"></option>
+    </select>
+    <br>
+    <div>
+        <button type="submit" class="button">Скачать</button>
+    </div>
+</form>
+</body>
+</html>

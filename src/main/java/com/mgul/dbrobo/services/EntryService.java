@@ -143,7 +143,6 @@ public class EntryService {
                         + str2.replaceAll("\\.", ","));
             } catch (IOException ex) {throw new RuntimeException();}
         }
-
         return new File("src/main/resources/log.csv");
     }
 

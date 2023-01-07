@@ -1,6 +1,5 @@
 package com.mgul.dbrobo.controllers;
 
-import com.mgul.dbrobo.models.Time;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +8,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
-import java.time.LocalDateTime;
 
 @Controller
 public class BasicController {
@@ -36,10 +33,6 @@ public class BasicController {
 
     @GetMapping("/mainexport")
     public String getExportPage(Model model){
-        model.addAttribute("time",
-                new Time(LocalDateTime.now(), LocalDateTime.now(),
-                        "1", "pribor"));
-        model.addAttribute("devices", deviceService.findAll());
         return "mainexport";
     }
 

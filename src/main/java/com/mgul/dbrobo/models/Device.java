@@ -22,7 +22,7 @@ public class Device {
     @Field("ObjectId")
     private String objectId;
     @Field("Removed")
-    private Boolean removed;
+    private Integer removed;
 
     public String getId() {
         return id;
@@ -88,11 +88,11 @@ public class Device {
         this.objectId = objectId;
     }
 
-    public Boolean getRemoved() {
+    public Integer getRemoved() {
         return removed;
     }
 
-    public void setRemoved(Boolean removed) {
+    public void setRemoved(Integer removed) {
         this.removed = removed;
     }
 }

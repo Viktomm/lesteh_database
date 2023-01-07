@@ -6,21 +6,24 @@
 </head>
 <body>
 
-<form th:action="@{/core/deb.php}"  th:object="${time}" th:method="get">
+<form th:action="@{/core/deb.php}" th:method="get">
     <div>
         <label for="date from">Выберите начало временного интервала</label>
-        <input type="datetime-local" th:field="*{fdate}" id="date from"/>
+        <input type="datetime-local" th:name="fdate" id="date from"/>
     </div>
     <br>
     <div>
         <label for="date to">Выберите конец временного интервала</label>
-        <input type="datetime-local" th:field="*{sdate}" id="date to"/>
+        <input type="datetime-local" th:name="sdate" id="date to"/>
     </div>
     <br>
-    <label for="dropDownList">(Для выдачи csv)Выберите прибор:</label>
-    <select class="form-control" id="dropDownList" th:field="*{deviceName}">
-        <option th:each="device : ${devices}" th:value="${device.getName()}" th:text="${device.getName()}"></option>
-    </select>
+    <div>
+        <input type="radio" name="group" id="jsonR" value="1" th:name="jsonOrCsv">
+        <label for="jsonR" th:text="JSON"></label>
+        <br>
+        <input type="radio" name="group" id="csvR" value="0" th:name="jsonOrCsv">
+        <label for="csvR" th:text="CSV"></label>
+    </div>
     <br>
     <div>
         <button type="submit" class="button">Скачать</button>

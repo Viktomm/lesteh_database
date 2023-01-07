@@ -13,10 +13,6 @@
 <button>
     <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}" download="log.txt" >Скачать json</a>
 </button>
-<br><br>
-    <button>
-        <a th:href="@{/core/deb.php/log.csv(fdate=${fdate},sdate=${sdate}, deviceName=${deviceName})}" download="log.csv">Скачать csv</a>
-    </button>
 </form>
 </body>
 </html>
