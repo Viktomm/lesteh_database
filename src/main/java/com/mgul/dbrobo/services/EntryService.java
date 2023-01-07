@@ -21,6 +21,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -106,7 +107,8 @@ public class EntryService {
         jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
         CsvMapper csvMapper = new CsvMapper();
-        try (FileWriter writer = new FileWriter("src/main/resources/log.csv")) {
+        try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8)) {
+            writer.write("\uFEFF");
             String headers = csvMapper
                     .writerFor(JsonNode.class)
                     .with(csvSchema)
@@ -138,7 +140,7 @@ public class EntryService {
                 throw new RuntimeException(ex);
             }
 
-            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", true)) {
+            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8, true)) {
                 writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
                         + str2.replaceAll("\\.", ","));
             } catch (IOException ex) {throw new RuntimeException();}
