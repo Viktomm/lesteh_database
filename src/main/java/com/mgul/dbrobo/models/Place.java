@@ -14,6 +14,10 @@ public class Place {
 
     private String name;
 
+    private Double lat;
+
+    private Double lon;
+
     public long getId() {
         return id;
     }
@@ -28,5 +32,21 @@ public class Place {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public Double getLat() {
+        return lat;
+    }
+
+    public void setLat(Double lat) {
+        this.lat = lat;
+    }
+
+    public Double getLon() {
+        return lon;
+    }
+
+    public void setLon(Double lon) {
+        this.lon = lon;
     }
 }

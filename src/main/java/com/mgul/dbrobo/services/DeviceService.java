@@ -8,13 +8,12 @@ import com.mgul.dbrobo.repositories.DeviceRepository;
 import com.mgul.dbrobo.repositories.EntryRepository;
 import com.mgul.dbrobo.repositories.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 @Service
 public class DeviceService {
@@ -22,6 +21,7 @@ public class DeviceService {
     private final PlaceRepository placeRepository;
 
     private final EntryRepository entryRepository;
+    private final int pageSize=3;
 
     @Autowired
     public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository) {
@@ -38,11 +38,9 @@ public class DeviceService {
             throw new DeviceNotFoundException("No such object in database");
         }
     }
-
     public List<Device> findAll() {
         return deviceRepository.findAll();
     }
-
     public void update(Device device) {
         Optional<Device> foundDevice = deviceRepository.findById(device.getId());
         if (foundDevice.isEmpty()) throw new DeviceNotFoundException("No device with such id");
@@ -59,7 +57,6 @@ public class DeviceService {
         d.setRemoved(device.getRemoved());
         deviceRepository.save(d);
     }
-
     private boolean isPlaceCorrect(String name) {
         List<Place> places = placeRepository.findAll();
         boolean isPlaceExist=false;
@@ -71,9 +68,8 @@ public class DeviceService {
         }
         return isPlaceExist;
     }
-
-    public void delete(Device device) {
-        Optional<Device> foundDevice = deviceRepository.findById(device.getId());
+    public void delete(Long id) {
+        Optional<Device> foundDevice = deviceRepository.findById(id);
         if (foundDevice.isEmpty()) throw new DeviceNotFoundException("No device with such id");
         Device d = foundDevice.get();
         d.setRemoved(1);
@@ -87,5 +83,50 @@ public class DeviceService {
         sensors.removeIf(x-> x.startsWith("system"));
         sensors.removeIf(x-> x.startsWith("RTC"));
         return sensors.stream().toList();
+    }
+    public Device findById(Long id) {
+        return deviceRepository.findById(id).get();
+    }
+    public int getCount(String name, String serial, String x, String y, String object, String removed) {
+        return (int)Math.ceil(getDeviceList(name, serial, x, y, object, removed).size()/((double)pageSize));
+    }
+
+    public List<Device> findByParams(String name, String serial, String x, String y, String object, String removed,int page) {
+        List<Device> ans = getDeviceList(name, serial, x, y, object, removed);
+        int startOfPage = (page-1)*pageSize;
+        int endOfPage = (startOfPage+pageSize >= ans.size())? ans.size() : startOfPage+pageSize;
+        return (ans.size()==0)? ans : ans.subList(startOfPage,endOfPage);
+    }
+
+    private List<Device> getDeviceList(String name, String serial, String x, String y, String object, String removed) {
+        List<Device> all = deviceRepository.findAll();
+        List<Device> ans = new ArrayList<>(all);
+        for(Device device:all) {
+            if (!device.getName().toUpperCase().contains(name.toUpperCase())) {
+                ans.remove(device);
+                continue;
+            }
+            if (!device.getSerial().toUpperCase().contains(serial.toUpperCase())) {
+                ans.remove(device);
+                continue;
+            }
+            if (!x.isEmpty() && device.getX()!=Double.parseDouble(x)) {
+                ans.remove(device);
+                continue;
+            }
+            if (!y.isEmpty() && device.getX()!=Double.parseDouble(x)) {
+                ans.remove(device);
+                continue;
+            }
+            if (!device.getObject().toUpperCase().contains(object.toUpperCase())) {
+                ans.remove(device);
+                continue;
+            }
+            if (!removed.isEmpty() && device.getRemoved()!=Integer.parseInt(removed)) {
+                ans.remove(device);
+            }
+        }
+        ans.sort(Comparator.comparing(Device::getId));
+        return ans;
     }
 }

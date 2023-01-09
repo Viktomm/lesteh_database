@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.controllers;
 
+import com.mgul.dbrobo.exceptions.WrongPasswordException;
 import com.mgul.dbrobo.models.*;
 import com.mgul.dbrobo.repositories.CalibrationRepository;
 import com.mgul.dbrobo.repositories.PlaceRepository;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -57,6 +59,8 @@ public class AdministrationController {
     public String editSomeone(Model model,@PathVariable String id) {
         model.addAttribute(adminService.findById(id));
         model.addAttribute("roles", Roles.values());
+        String obj = new String();
+        model.addAttribute("passcopy",obj);
         return "/administration/update";
     }
 
@@ -74,7 +78,11 @@ public class AdministrationController {
 
     @PatchMapping("/edit/{id}")
     public String updateSomeone(@PathVariable String id,
-                                        @ModelAttribute("admin") Admin admin) {
+                                        @ModelAttribute("admin") Admin admin,
+                                @ModelAttribute("passcopy") String passCopy) {
+        if (!admin.getPassword().equals(passCopy)) {
+            throw new WrongPasswordException("Пароли не совпадают");
+        }
         adminService.update(id,admin);
         return "redirect:/admin/edit";
     }
@@ -91,20 +99,45 @@ public class AdministrationController {
     }
 
     @PostMapping("/insert")
-    public String insertMany(@RequestBody List<LinkedHashMap<String, LinkedHashMap<String, String>>> allData) {
-        entryService.insertMany(allData);
+    public String insertMany(@RequestParam("file") MultipartFile file) {
+        entryService.saveDataFromFile(file);
         return "redirect:/admin";
     }
 
-    @GetMapping("/devices")
-    //@ResponseBody
-    public String getDevices(HttpServletResponse httpServletResponse, @ModelAttribute("device") Device device, Model model) {
-        model.addAttribute("devices",deviceService.findAll());
-        httpServletResponse.setContentType("application/javascript");
-        return "administration/devices";
-        //return ResponseEntity.ok(deviceService.findAll());
+    @GetMapping("/devices/new")
+    public String addDevice(Model model) {
+        model.addAttribute("newDev",new Device());
+        return "administration/addDevice";
     }
 
+    @GetMapping("/devices")
+    public String getDevices(@ModelAttribute("device") Device device) {
+        return "administration/devices";
+    }
+    @GetMapping(value = "/devices",params = {"name","serial","x","y","object","removed"})
+    public String getDevicesWithParams(@RequestParam String name,@RequestParam String serial,@RequestParam String x,
+                                       @RequestParam String y,@RequestParam String object,@RequestParam String removed,@RequestParam(defaultValue = "1") int page,Model model) {
+        return "administration/devices";
+    }
+
+    @GetMapping(value="/devices/get",params = {"name","serial","x","y","object","removed"})
+    public ResponseEntity getDevices(@RequestParam String name,@RequestParam String serial,@RequestParam String x,
+                                     @RequestParam String y,@RequestParam String object,@RequestParam String removed,@RequestParam(defaultValue = "1") int page) {
+        return ResponseEntity.ok(deviceService.findByParams(name,serial,x,y,object,removed,page));
+    }
+    @GetMapping("/devices/getall")
+    public ResponseEntity getAllDevices() {
+        return ResponseEntity.ok(deviceService.findAll());
+    }
+    @GetMapping(value = "/devices/get")
+    public ResponseEntity getDevicesWOParams(@RequestParam(defaultValue = "1") int page) {
+        return ResponseEntity.ok(deviceService.findByParams("","","","","","",page));
+    }
+    @GetMapping("/devices/getNumberOfPages")
+    public ResponseEntity getNum(@RequestParam String name,@RequestParam String serial,@RequestParam String x,
+                                 @RequestParam String y,@RequestParam String object,@RequestParam String removed) {
+        return ResponseEntity.ok(deviceService.getCount(name,serial,x,y,object,removed));
+    }
     @GetMapping(value = "/devices",params = {"uid"})
     public ResponseEntity getSensorsList(@RequestParam Long uid) {
         HttpHeaders headers = new HttpHeaders();
@@ -113,9 +146,11 @@ public class AdministrationController {
         return ResponseEntity.ok().headers(headers).body(deviceService.getSensorsList(uid));
     }
 
-    @GetMapping("/devices/get")
-    public ResponseEntity getDevices() {
-        return ResponseEntity.ok(deviceService.findAll());
+
+    @GetMapping("/devices/edit")
+    public String getEditDevicePage(@RequestParam Long id,Model model){
+        model.addAttribute("device",deviceService.findById(id));
+        return "administration/editDevice";
     }
 
     @PostMapping("/devices")
@@ -132,8 +167,8 @@ public class AdministrationController {
     }
 
     @DeleteMapping("/devices")
-    public String deleteDevice(@ModelAttribute("device") Device device) {
-        deviceService.delete(device);
+    public String deleteDevice(@RequestParam("id") Long id) {
+        deviceService.delete(id);
         return "redirect:/admin/devices";
     }
 
@@ -141,6 +176,21 @@ public class AdministrationController {
     public String getPlaces(@ModelAttribute("place") Place place, Model model) {
         model.addAttribute("objects",placeRepository.findAll());
         return "administration/places";
+    }
+    @GetMapping("/objects/{id}")
+    public String getEditPlace(@PathVariable Long id,Model model) {
+        model.addAttribute("place",placeRepository.findById(id));
+        return "administration/editObject";
+    }
+    @GetMapping("/objects/new")
+    public String addNewObject(Model model) {
+        model.addAttribute("place",new Place());
+        return "administration/addObject";
+    }
+    @PatchMapping("/objects")
+    public String updatePlace(@ModelAttribute Place place) {
+        placeRepository.save(place);
+        return "redirect:/admin/objects";
     }
     @GetMapping("/objects/get")
     public ResponseEntity getPlacesForJs() {
@@ -154,10 +204,16 @@ public class AdministrationController {
         return "redirect:/admin/objects";
     }
 
-    @DeleteMapping("/objects")
-    public String deletePlace(@ModelAttribute("place") Place place) {
-        placeRepository.deleteById(place.getId());
+    @DeleteMapping("/objects/{id}")
+    public String deletePlace(@PathVariable Long id) {
+        placeRepository.deleteById(id);
         return "redirect:/admin/objects";
+    }
+
+    @PostMapping("/multiplecalibration")
+    public String addCalibration(@RequestBody List<Calibration> calibrations) {
+        calibrationRepository.insert(calibrations);
+        return "redirect:/";
     }
 
 
@@ -168,11 +224,6 @@ public class AdministrationController {
     }
 
 
-    @PostMapping("/multiplecalibration")
-    public String addCalibration(@RequestBody List<Calibration> calibrations) {
-        calibrationRepository.insert(calibrations);
-        return "redirect:/";
-    }
 
     @GetMapping("/calibration")
     public String getCalibration() {
@@ -181,83 +232,10 @@ public class AdministrationController {
 
     @GetMapping(value = "/calibration",params = {"name","sensor"})
     public String addCalibration(@RequestParam String name, @RequestParam String sensor, Model model) {
-//        Calibration calibration;
-//        if (calibrationRepository.findByuNameAndSerial(name.split(" ")[0],name.split(" ")[1]).isEmpty()) {
-//            calibration = new Calibration();
-//            calibration.setuName(name.split(" ")[0]);
-//            calibration.setSerial(name.split(" ")[1]);
-//            ArrayList<Sensor> sensors = new ArrayList<>();
-//            Sensor sensorToAdd=new Sensor();
-//            sensorToAdd.setSensor(sensor);
-//            ArrayList<Calibr> calibrs = new ArrayList<>();
-//            Calibr calibr = new Calibr();
-//            calibr.setDatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-//            CalibrData calibrData = new CalibrData();
-//            ArrayList<Double> ai = new ArrayList<>();
-//            for (int i = 0; i < 8; i++) {
-//                ai.add(0.0);
-//            }
-//            calibrData.setAi(ai);
-//            calibr.setData(calibrData);
-//            calibrs.add(calibr);
-//            sensorToAdd.setCalibr(calibrs);
-//            sensors.add(sensorToAdd);
-//            calibration.setSensors(sensors);
-//            model.addAttribute("calibration",calibration);
-//        } else {
-//            calibration = calibrationRepository.findByuNameAndSerial(name.split(" ")[0],name.split(" ")[1]).get();
-//            ArrayList<Sensor> sensors = calibration.getSensors();
-//            Sensor sensor1 = null;
-//            if (sensors==null) {
-//                sensors = new ArrayList<>();
-//            }
-//            for(Sensor s:sensors) {
-//                if (s.getSensor().equals(sensor)) {
-//                    sensor1=s;
-//                    break;
-//                }
-//            }
-//            if (sensor1==null) {
-//                sensor1=new Sensor();
-//                sensor1.setSensor(sensor);
-//                sensors.add(sensor1);
-//            }
-//            ArrayList<Calibr> calibrs;
-//            if (sensor1.getCalibr()!=null) {
-//                calibrs=sensor1.getCalibr();
-//            } else {
-//                calibrs = new ArrayList<>();
-//                sensor1.setCalibr(calibrs);
-//            }
-//            Calibr calibr = new Calibr();
-//            calibr.setDatetime(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date()));
-//            CalibrData calibrData = new CalibrData();
-//            ArrayList<Double> ai = new ArrayList<>();
-//            for (int i = 0; i < 8; i++) {
-//                ai.add(0.0);
-//            }
-//            calibrData.setAi(ai);
-//            calibr.setData(calibrData);
-//            calibrs.add(calibr);
-//            calibration.setSensors(sensors);
-//            System.out.println(calibration);
-//            model.addAttribute("calibration",calibration);
-//        }
-//        ArrayList<Sensor> sensors = calibration.getSensors();
-//        for(Sensor s:sensors) {
-//            if (s.getSensor().equals(sensor)) {
-//                model.addAttribute("sensor",sensors.indexOf(s));
-//                model.addAttribute("ind",sensors.get(sensors.indexOf(s)).getCalibr().size()-1);
-//                break;
-//            }
-//        }
         CalibrationDTO calibrationDTO = new CalibrationDTO();
         calibrationDTO.setName(name);
         calibrationDTO.setSensor(sensor);
         List<Double> ai = new ArrayList<>();
-        for (int i = 0; i < 8; i++) {
-                ai.add(0.0);
-            }
         calibrationDTO.setAi(ai);
         model.addAttribute("dto",calibrationDTO);
         return "administration/addCalibr";

@@ -1,5 +1,7 @@
 package com.mgul.dbrobo.services;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
@@ -10,7 +12,10 @@ import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.sql.Timestamp;
@@ -47,9 +52,9 @@ public class EntryService {
             String deviceName = device.get().getName();
             String deviceSerial = device.get().getSerial();
             for(String key: entryData.keySet()){
-                Map<String,String> value = entryData.get(key);
+                LinkedHashMap<String,String> value = entryData.get(key);
                 for(String innerKey: value.keySet()) {
-                    newEntryData.put(key+"_"+innerKey,value.get(innerKey));
+                    newEntryData.put(key + "_" + innerKey, value.get(innerKey));
                 }
             }
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -110,4 +115,18 @@ public class EntryService {
         }
         return result;
     }
+
+    public void saveDataFromFile(MultipartFile file) {
+        try{
+            ObjectMapper objectMapper = new ObjectMapper();
+            InputStream in = file.getInputStream();
+            ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>> payload;
+            List<LinkedHashMap<String, LinkedHashMap<String, String>>> test=new ArrayList<>();
+            payload=objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>>>(){});
+            insertMany(payload);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
 }

@@ -3,6 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <title>Calibration</title>
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+        th {
+            border: 1px solid grey;
+        }
+        td {
+            border: 1px solid grey;
+        }
+    </style>
 </head>
 <body>
 <a href="/admin">
@@ -12,6 +23,10 @@
     <select id="unitid" name="unitid" required>
         <option>---</option>
     </select> <br>
+    <div>
+        <input type="checkbox" id="all" name="all" checked >
+        <label for="all">Только актуальные калибровочные данные</label>
+    </div> <br>
     <label id="test">Название прибора</label>
     <table>
         <thead><tr>
@@ -38,7 +53,8 @@
     let table = document.getElementById("mytable")
     let xhttp = new XMLHttpRequest()
     let unit = document.getElementById("unitid")
-    xhttp.open("GET","/admin/devices/get",false)
+    let checkbox = document.getElementById("all")
+    xhttp.open("GET","/admin/devices/getall",false)
     xhttp.send()
     let devices = JSON.parse(xhttp.response)
     xhttp.open("GET","/admin/calibration/get",false)
@@ -51,12 +67,23 @@
         node.appendChild(document.createTextNode(device.name+"::"+device.serial))
         document.getElementById("unitid").appendChild(node)
     }
+
+    let sensors;
+    let onlyActualData = true;
     unit.onchange = function () {
         document.getElementById("test").textContent= unit.options[unit.selectedIndex].text.replace("::"," ");
         xhttp=new XMLHttpRequest()
         xhttp.open("GET","/admin/devices?uid="+unit.options[unit.selectedIndex].value,false)
         xhttp.send()
-        let sensors = JSON.parse(xhttp.responseText)
+        sensors = JSON.parse(xhttp.responseText)
+        updateTable()
+    }
+    checkbox.onchange = function () {
+        onlyActualData = checkbox.checked;
+        updateTable()
+    }
+
+    function updateTable() {
         table.innerHTML=''
         for(let sensor of sensors) {
             let row = table.insertRow(-1);
@@ -74,24 +101,33 @@
                             calibr.sort(function(a,b){
                                 return new Date(b.datetime) - new Date(a.datetime);
                             });
-                            for(let c of calibr) {
-                                if (flag === true) {
-                                    row = table.insertRow(-1);
-                                    let name = row.insertCell(0);
-                                    let link = document.createElement("a")
-                                    link.appendChild(document.createTextNode(sensor))
-                                    link.href = `/admin/calibration?name=${unit.options[unit.selectedIndex].text}&sensor=${sensor}`
-                                    name.appendChild(link)
-                                }
+
+                            if (onlyActualData) {
+                                let c = calibr[0];
                                 let date = row.insertCell(1);
-                                date.innerHTML=c.datetime;
+                                date.innerHTML = c.datetime;
                                 let n = row.insertCell(2);
                                 n.innerHTML = c.data.n;
-                                for(let i=0;i<c.data.ai.length;i++) {
-                                    let ai = row.insertCell(3+i);
-                                    ai.innerHTML=c.data.ai[i];
+                                for (let i = 0; i < c.data.ai.length; i++) {
+                                    let ai = row.insertCell(3 + i);
+                                    ai.innerHTML = c.data.ai[i];
                                 }
-                                flag=true;
+                            } else {
+                                for (let c of calibr) {
+                                    if (flag === true) {
+                                        row = table.insertRow(-1);
+                                        row.insertCell(0);
+                                    }
+                                    let date = row.insertCell(1);
+                                    date.innerHTML = c.datetime;
+                                    let n = row.insertCell(2);
+                                    n.innerHTML = c.data.n;
+                                    for (let i = 0; i < c.data.ai.length; i++) {
+                                        let ai = row.insertCell(3 + i);
+                                        ai.innerHTML = c.data.ai[i];
+                                    }
+                                    flag = true;
+                                }
                             }
                         }
                     }

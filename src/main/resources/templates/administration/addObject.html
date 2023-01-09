@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add new object</title>
+</head>
+<body>
+<a href="/admin/objects">
+    <input type="submit" value="Назад">
+</a>
+<form th:method="POST" action="/admin/objects" th:object="${place}">
+    <label>
+        Создание объекта размещения <br>
+    </label>
+    <label for="name">Введите наименование </label>
+    <input type="text" placeholder="Введите новое наименование " th:field="*{name}" id="name"> <br>
+    <label for="lat">Введите широту</label>
+    <input type="text" placeholder="Введите новую широту " th:field="*{lat}" id="lat"> <br>
+    <label for="lon">Введите долготу</label>
+    <input type="text" placeholder="Введите новую долготу " th:field="*{lon}" id="lon"> <br>
+    <input type="submit" value="Создать">
+</form>
+</body>
+</html>

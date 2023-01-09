@@ -5,12 +5,11 @@
     <title>Update</title>
 </head>
 <body>
-<a href="/admin">
+<a href="/admin/edit">
     <input type="submit" value="Назад">
 </a>
 <form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" >
-  <label for="username">Введите username</label>
-  <input type="text" th:field="${admin.username}" id="username"> <br>
+    <input type="hidden" th:field="${admin.username}">
   <label for="password">Введите новый пароль</label>
   <input type="password" th:field="${admin.password}" id="password"><br>
   <label for="fio">Введите ФИО</label>
@@ -25,9 +24,6 @@
   <input type="submit" value="Изменить">
 </form>
 
-<form th:method="DELETE" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" th:object="${admin}">
-    <input type="submit" value="Удалить этого администратора">
-</form>
 
 </body>
 </html>

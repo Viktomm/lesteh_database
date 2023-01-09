@@ -5,18 +5,52 @@
     <title>Add new calibration</title>
 </head>
 <body>
+<a href="/admin/calibration">
+    <input type="submit" value="Назад">
+</a>
 <form th:method="PUT" th:action="@{calibration}" th:object="${dto}" >
     <input type="hidden" th:field="*{name}">
     <input type="hidden" th:field="*{sensor}">
-    <input type="text" th:field="*{n}"> <br>
-    <input type="text" th:field="*{ai[0]}"> <br>
-    <input type="text" th:field="*{ai[1]}"> <br>
-    <input type="text" th:field="*{ai[2]}"> <br>
-    <input type="text" th:field="*{ai[3]}"> <br>
-    <input type="text" th:field="*{ai[4]}"> <br>
-    <input type="text" th:field="*{ai[5]}"> <br>
-    <input type="text" th:field="*{ai[6]}"> <br>
-    <input type="submit" value="Внести">
+    <label>Выберите n:</label> <br>
+    <select id="power" name="n" required>
+        <option>0</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+    </select>
+    <br>
+    <label>Введите коэффициенты</label> <br>
+    <div id="container">
+        <input type="text" name="ai[0]"> <br>
+    </div>
+<!--    <input type="text" th:field="*{ai[0]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[1]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[2]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[3]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[4]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[5]}"> <br>-->
+<!--    <input type="text" th:field="*{ai[6]}"> <br>-->
+    <input type="submit" value="Ввести">
 </form>
 </body>
+<script>
+    let power = document.getElementById("power")
+    let container = document.getElementById("container")
+    power.onchange = function () {
+        while (container.hasChildNodes()) {
+            container.removeChild(container.lastChild)
+        }
+
+            for (let i = 0; i < Number(power.value)+1; i++) {
+                let input = document.createElement("input")
+                input.type = "text";
+                input.name = `ai[${i}]`;
+                container.appendChild(input)
+                container.appendChild(document.createElement("br"))
+            }
+
+    }
+</script>
 </html>

@@ -3,29 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <title>objects</title>
+  <style type="text/css">
+    table {
+      border-collapse: collapse;
+    }
+    th {
+      border: 1px solid grey;
+    }
+    td {
+      border: 1px solid grey;
+    }
+  </style>
 </head>
 <body>
 <a href="/admin">
   <input type="submit" value="Назад">
 </a>
 <center>
-  <div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
-    <form th:method="POST" th:action="@{objects}" th:object="${place}">
+  <div>
+    <form th:method="GET" th:action="@{objects/new}">
       <label>
         Добавить новый объект <br>
       </label>
-      <input type="text" placeholder="Введите наименование " th:field="*{name}"> <br>
       <input type="submit" value="Добавить">
-    </form>
-  </div>
-
-  <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
-    <form th:method="DELETE" th:action="@{objects}" th:object="${place}">
-      <label>
-        Удалить объект из базы <br>
-      </label>
-      <input type="text" placeholder="Введите Id" id = "id" name = "id"> <br>
-      <input type="submit" value="Удалить">
     </form>
   </div>
 
@@ -38,10 +38,21 @@
       <tr>
         <th>Id</th>
         <th>Название объекта</th>
+        <th>Широта</th>
+        <th>Долгота</th>
       </tr>
       <tr th:each="object : ${objects}">
-        <td th:text="${object.getId()}"></td>
-        <td th:text="${object.getName()}"></td>
+        <td th:text="${object.id}"></td>
+        <td>
+          <a th:href="@{objects/{id}(id=${object.getId()})}" th:text="${object.name}">name</a>
+        </td>
+        <td th:text="${object.lat}"></td>
+        <td th:text="${object.lon}"></td>
+        <td>
+          <form th:method="DELETE" th:action="@{objects/{id}(id=${object.getId()})}">
+            <input type="submit" value="Удалить">
+          </form>
+        </td>
       </tr>
       </table>
   </div>

@@ -32,7 +32,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().defaultSuccessUrl("/admin").failureUrl("/login?error").and()
+                .formLogin().defaultSuccessUrl("/admin",true).failureUrl("/login?error").and()
                 .logout().logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .and()
@@ -49,9 +49,4 @@ public class SecurityConfig {
         return NoOpPasswordEncoder.getInstance();
     }
 
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) ->
-//            web.ignoring().anyRequest();
-//    }
 }

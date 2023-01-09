@@ -18,7 +18,6 @@ public class Device {
     @Field("Akey")
     private String akey;
 
-
     @Field("X")
     private double x;
 
@@ -27,7 +26,6 @@ public class Device {
 
     @Field("Object")
     private String object;
-
 
     @Field("Removed")
     private int removed;
@@ -94,5 +92,19 @@ public class Device {
 
     public void setRemoved(int removed) {
         this.removed = removed;
+    }
+
+    @Override
+    public String toString() {
+        return "Device{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", serial='" + serial + '\'' +
+                ", akey='" + akey + '\'' +
+                ", x=" + x +
+                ", y=" + y +
+                ", object='" + object + '\'' +
+                ", removed=" + removed +
+                '}';
     }
 }

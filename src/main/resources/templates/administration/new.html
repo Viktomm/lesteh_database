@@ -5,7 +5,9 @@
     <title>New Admin</title>
 </head>
 <body>
-
+<a href="/admin/edit">
+    <input type="submit" value="Назад">
+</a>
 <form th:method="POST" th:action="@{edit}" th:object="${admin}">
     <label for="username">Введите username</label>
     <input type="text" th:field="*{username}" id="username"> <br>

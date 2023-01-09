@@ -72,7 +72,6 @@ public class CalibrationService {
             calibrs.add(calibr);
             calibration.setSensors(sensors);
         }
-        System.out.println(calibration);
         calibrationRepository.save(calibration);
     }
 
