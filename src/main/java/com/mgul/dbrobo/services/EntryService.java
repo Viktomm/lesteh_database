@@ -86,8 +86,6 @@ public class EntryService {
             throw new WrongAKeyException("There's no device with such aKey");
     }
 
-    //TODO:Тут запрос клоунский, его бы переписать через SQL
-    //я его конечно переделал, но кажись он всё ещё клоунский :(
     public List<Entry> firstTenEntries() {
         return entryRepository.findAll(PageRequest.of(0,2,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
@@ -139,7 +137,6 @@ public class EntryService {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-
             try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8, true)) {
                 writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
                         + str2.replaceAll("\\.", ","));
@@ -147,12 +144,6 @@ public class EntryService {
         }
         return new File("src/main/resources/log.csv");
     }
-
-
-
-
-
-
 
     public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);

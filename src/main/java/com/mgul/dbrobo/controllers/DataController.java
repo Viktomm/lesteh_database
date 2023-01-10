@@ -81,7 +81,7 @@ public class DataController {
         }
     }
 
-    @GetMapping(value = "/deb.php/log.csv") // produces = "text/csv;charset=UTF-8"
+    @GetMapping(value = "/deb.php/log.csv")
     public ResponseEntity loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
