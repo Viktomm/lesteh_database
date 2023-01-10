@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<button>
+    <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}">Посмотреть в браузере</a>
+</button>
+<br><br>
+<button>
+    <a th:href="@{/core/deb.php/text(fdate=${fdate},sdate=${sdate})}" download="log.txt" >Скачать json</a>
+</button>
+</form>
+</body>
+</html>

@@ -11,13 +11,11 @@ public class Device {
     public static final String SEQUENCE_NAME = "devices_sequence";
     @Id
     private long id;
-
     @Field("uName")
     private String name;
     private String serial;
     @Field("Akey")
     private String akey;
-
     @Field("X")
     private double x;
 
@@ -91,20 +89,9 @@ public class Device {
     }
 
     public void setRemoved(int removed) {
+
         this.removed = removed;
     }
 
-    @Override
-    public String toString() {
-        return "Device{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", serial='" + serial + '\'' +
-                ", akey='" + akey + '\'' +
-                ", x=" + x +
-                ", y=" + y +
-                ", object='" + object + '\'' +
-                ", removed=" + removed +
-                '}';
-    }
+
 }

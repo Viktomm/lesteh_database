@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
+
 @Service
 public class DeviceService {
     private final DeviceRepository deviceRepository;
@@ -30,6 +31,8 @@ public class DeviceService {
         this.entryRepository = entryRepository;
     }
 
+    public List<Device> findAll() { return deviceRepository.findAll();}
+
     @Transactional
     public void save(Device device) {
         if (isPlaceCorrect(device.getObject())) {
@@ -37,9 +40,6 @@ public class DeviceService {
         } else {
             throw new DeviceNotFoundException("No such object in database");
         }
-    }
-    public List<Device> findAll() {
-        return deviceRepository.findAll();
     }
     public void update(Device device) {
         Optional<Device> foundDevice = deviceRepository.findById(device.getId());

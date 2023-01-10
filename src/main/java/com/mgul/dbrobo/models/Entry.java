@@ -14,35 +14,24 @@ import java.util.Map;
 public class Entry {
     @Id
     private String id;
-
-
     @Field("Date")
     private String date;
-
     private LocalDateTime dateForCalculation;
-
+    @Field("uName")
     private String uName;
-
     private String serial;
     private LinkedHashMap<String,String> data;
 
     private String getIdNotForSpring() {
         return id;
     }
-
-
-    public String getDate() {
-        return date;
-    }
-
+    public String getDate() { return date; }
     public void setDate(String date) {
         this.date = date;
     }
-
     private LocalDateTime getDateForCalculation() {
         return dateForCalculation;
     }
-
     public void setDateForCalculation(LocalDateTime dateForCalculation) {
         this.dateForCalculation = dateForCalculation;
     }

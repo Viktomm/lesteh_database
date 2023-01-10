@@ -1,27 +1,45 @@
 package com.mgul.dbrobo.services;
 
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.repositories.DeviceRepository;
 import com.mgul.dbrobo.repositories.EntryRepository;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -93,15 +111,64 @@ public class EntryService {
         entryRepository.insert(entries);
     }
 
-
-    //TODO:Тут запрос клоунский, его бы переписать через SQL
-    //я его конечно переделал, но кажись он всё ещё клоунский :(
     public List<Entry> firstTenEntries() {
         return entryRepository.findAll(PageRequest.of(0,2,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
-    public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate){
+    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
+        List<Entry> result = entryRepository.findByuNameAndDateForCalculationBetween(deviceName, fdate, sdate);
+
+        CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
+        ObjectMapper mapper = new ObjectMapper();
+        Entry entryFirst = result.stream().findAny().get();
+        JsonNode jsonTree = mapper.valueToTree(entryFirst);
+        JsonNode jsonNodeData = jsonTree.get("data");
+        csvSchemaBuilder.addColumn("date");
+        jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
+        CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+        CsvMapper csvMapper = new CsvMapper();
+        try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8)) {
+            writer.write("\uFEFF");
+            String headers = csvMapper
+                    .writerFor(JsonNode.class)
+                    .with(csvSchema)
+                    .writeValueAsString(null);
+
+            writer.write(String.format("Прибор: ;%s;Интервал: ;%s; / ;%s;\n", deviceName,
+                    fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
+                    sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+            writer.write(headers);
+        } catch (IOException ex) {throw new RuntimeException();}
+
+
+        for (Entry entry : result) {
+            jsonTree = mapper.valueToTree(entry);
+            jsonNodeData = jsonTree.get("data");
+            String str1;
+            String str2;
+            try {
+                str1 = csvMapper
+                        .configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true)
+                        .writerFor(JsonNode.class)
+                        .with(csvSchema.withoutHeader())
+                        .writeValueAsString(jsonTree);
+                str2 = csvMapper
+                        .writerFor(JsonNode.class)
+                        .with(csvSchema.withoutHeader())
+                        .writeValueAsString(jsonNodeData);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8, true)) {
+                writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
+                        + str2.replaceAll("\\.", ","));
+            } catch (IOException ex) {throw new RuntimeException();}
+        }
+        return new File("src/main/resources/log.csv");
+    }
+
+    public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);
         LinkedHashMap<String,Entry> result = new LinkedHashMap<>();
         for(Entry entry:fromDb) {
@@ -110,7 +177,7 @@ public class EntryService {
                 getId.setAccessible(true);
                 result.put((String)getId.invoke(entry),entry);
             } catch (Exception e) {
-                throw new RuntimeException("Кто-то сломал рефлексию =(");
+                throw new RuntimeException("Reflection error");
             }
         }
         return result;

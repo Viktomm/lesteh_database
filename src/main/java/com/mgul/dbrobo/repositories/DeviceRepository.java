@@ -1,6 +1,7 @@
 package com.mgul.dbrobo.repositories;
 
 import com.mgul.dbrobo.models.Device;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
@@ -15,4 +16,6 @@ public interface DeviceRepository extends MongoRepository<Device,String> {
     Optional<Device> findByName(String name);
 
     List<Device> findByNameAndSerialAndXAndYAndObjectAndRemoved(String name, String serial, String x, String y, String object, String removed, Pageable pageable);
+
+    Page<Device> findAll(Pageable pageable);
 }
