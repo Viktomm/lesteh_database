@@ -17,9 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
@@ -93,7 +91,7 @@ public class EntryService {
 
 
 
-    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
+    public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
         List<Entry> result = entryRepository.findByuNameAndDateForCalculationBetween(deviceName, fdate, sdate);
 
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
@@ -105,7 +103,8 @@ public class EntryService {
         jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
         CsvMapper csvMapper = new CsvMapper();
-        try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8)) {
+        CharArrayWriter writer = new CharArrayWriter();
+        try { // "src/main/resources/log.csv"
             writer.write("\uFEFF");
             String headers = csvMapper
                     .writerFor(JsonNode.class)
@@ -137,12 +136,12 @@ public class EntryService {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8, true)) {
+            try { // "src/main/resources/log.csv", StandardCharsets.UTF_8, true
                 writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
                         + str2.replaceAll("\\.", ","));
             } catch (IOException ex) {throw new RuntimeException();}
         }
-        return new File("src/main/resources/log.csv");
+        return writer.toString();
     }
 
     public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {

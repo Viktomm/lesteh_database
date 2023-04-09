@@ -17,8 +17,9 @@ public class DeviceService {
         this.deviceRepository = deviceRepository;
     }
 
-    public List<Device> findAll() { return deviceRepository.findAll();}
+    public List<String> findAllDeviceName() { return deviceRepository.findAll().stream().map(x -> x.getName()).toList();}
 
+    public List<Device> findAll() { return deviceRepository.findAll();}
     @Transactional
     public void save(Device device) {
         deviceRepository.insert(device);
