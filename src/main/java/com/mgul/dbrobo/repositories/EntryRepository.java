@@ -10,10 +10,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EntryRepository extends MongoRepository<Entry,String> {
-    //Возможно не рабочая заготовка под дебаг монитор
+
     Page<Entry> findAll(Pageable pageable);
 
-    //Возможно рабочая заготовка под отображение
     List<Entry> findByDateForCalculationBetween(LocalDateTime start,LocalDateTime end);
+
+    Entry findFirstByuNameAndSerial(String uName,String serial);
     List<Entry> findByuNameAndDateForCalculationBetween(String uName, LocalDateTime start,LocalDateTime end);
 }

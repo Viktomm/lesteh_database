@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>objects</title>
+  <style type="text/css">
+    table {
+      border-collapse: collapse;
+    }
+    th {
+      border: 1px solid grey;
+    }
+    td {
+      border: 1px solid grey;
+    }
+  </style>
+</head>
+<body>
+<a href="/admin">
+  <input type="submit" value="Назад">
+</a>
+<center>
+  <div>
+    <form th:method="GET" th:action="@{objects/new}">
+      <label>
+        Добавить новый объект <br>
+      </label>
+      <input type="submit" value="Добавить">
+    </form>
+  </div>
+
+<br>  <div style="font-size: xx-large">
+  Список объектов:
+</div> <br>
+
+  <div th:if="${ not#lists.isEmpty(objects)}" style="font-size: larger">
+    <table>
+      <tr>
+        <th>Id</th>
+        <th>Название объекта</th>
+        <th>Широта</th>
+        <th>Долгота</th>
+      </tr>
+      <tr th:each="object : ${objects}">
+        <td th:text="${object.id}"></td>
+        <td>
+          <a th:href="@{objects/{id}(id=${object.getId()})}" th:text="${object.name}">name</a>
+        </td>
+        <td th:text="${object.lat}"></td>
+        <td th:text="${object.lon}"></td>
+        <td>
+          <form th:method="DELETE" th:action="@{objects/{id}(id=${object.getId()})}">
+            <input type="submit" value="Удалить">
+          </form>
+        </td>
+      </tr>
+      </table>
+  </div>
+
+</center>
+</body>
+</html>

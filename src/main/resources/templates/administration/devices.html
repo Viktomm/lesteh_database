@@ -3,43 +3,237 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style type="text/css">
+        table {
+            border-collapse: collapse;
+        }
+        th {
+            border: 1px solid grey;
+        }
+        td {
+            border: 1px solid grey;
+        }
+    </style>
+<!--    <style type="text/css">-->
+<!--        datalist {-->
+<!--            position: absolute;-->
+<!--            background-color: white;-->
+<!--            border: 1px solid black;-->
+<!--            border-radius: 0 0 5px 5px;-->
+<!--            border-top: none;-->
+<!--            font-family: sans-serif;-->
+<!--            width: 165px;-->
+<!--            padding: 5px;-->
+<!--            max-height: 10rem;-->
+<!--            overflow-y: auto-->
+
+<!--        }-->
+
+<!--        option {-->
+<!--            background-color: white;-->
+<!--            padding: 4px;-->
+<!--            margin-bottom: 1px;-->
+<!--            font-size: 18px;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+
+<!--        option:hover,  .active{-->
+<!--            background-color: lightblue;-->
+<!--        }-->
+
+<!--    </style>-->
 </head>
 <body>
+<a href="/admin">
+    <input type="submit" value="Назад">
+</a>
 <center>
-    <p>
-    </p><div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
-    <form th:method="POST" th:action="" th:object="device">
-        <label> Добавить новый прибор<br> </label>
-        <input name="uname" type="text" placeholder="Введите наименование" required=""><br>
-        <input name="userial" type="text" placeholder="Введите серийный ключ" required=""><br>
-        <input name="uakey" type="text" placeholder="Введите ключ доступа" required=""><br>
-        <input name="ux" type="text" placeholder="Введите координату X" required=""><br>
-        <input name="uy" type="text" placeholder="Введите координату Y" required=""><br>
-        <input name="uidobj" type="text" placeholder="Введите ID объекта" required=""><br>
-        <input name="uidop" type="text" placeholder="Введите ID оператора" required=""><br>
-        <input type="submit" name="gotadd" value="Добавить"><br>
+    <div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
+        <form th:method="GET" th:action="@{devices/new}">
+            <input type="submit" value="Добавить прибор">
+        </form>
+    </div>
+
+
+
+
+    <br>  <div style="font-size: xx-large">
+    Список приборов:
+</div> <br>
+        <label for="nameinput">Поиск по имени</label>
+        <input type="text" id="nameinput" placeholder="Search..." title="Type in something">
+    <div>
+        <label for="serialinput">Поиск по серийному номеру</label>
+        <input type="text" id="serialinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="xinput">Поиск по Х координате</label>
+        <input type="text" id="xinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="yinput">Поиск по У координате</label>
+        <input type="text" id="yinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="objectinput">Поиск по объекту</label>
+        <input type="text" id="objectinput" placeholder="Search..." title="Type in something">
+    </div>
+    <div>
+        <label for="removedinput">Фильтр по состоянию удаления</label>
+        <input type="text" id="removedinput" placeholder="Search..." title="Type in something">
+    </div>
+    <br>
+    <form method="get">
+        <input type="button" value="Применить фильтр" onclick="applyParams();">
     </form>
-</div>
-    <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
-        <form method="POST" action="">
-            <label> Обновить данные<br> </label>
-            <input name="updid" type="text" placeholder="Введите ID прибора" required=""><br>
-            <input name="updname" type="text" placeholder="Введите новое имя"><br>
-            <input name="updx" type="text" placeholder="Введите новую координату X"><br>
-            <input name="updy" type="text" placeholder="Введите новую координату Y"><br>
-            <input name="updobj" type="text" placeholder="Введите ID нового объекта"><br>
-            <input name="updop" type="text" placeholder="Введите ID нового оператора"><br>
-            <input type="submit" name="gotdel" value="Обновить"><br>
-        </form>
+    <div style="font-size: larger">
+        <table>
+            <thead><tr>
+                <th>Id</th>
+                <th>Наименование</th>
+                <th>Серийный номер</th>
+                <th>Ключ доступа</th>
+                <th>X</th>
+                <th>Y</th>
+                <th>Название объекта</th>
+                <th>Удалён ли?</th>
+            </tr>
+            </thead>
+            <tbody id="mytable">
+            <tr>
+            </tr>
+            </tbody>
+        </table>
+        <a href="javascript:prevPage()" id="btn_prev" style="visibility: hidden">Пред.</a>
+        <a href="javascript:nextPage()" id="btn_next">След.</a> <br>
+        Страница: <span id="page"></span>
     </div>
-    <div style="display: inline-block; margin-left: 45px; vertical-align: middle;">
-        <form method="POST" action="">
-            <label> Удалить прибор из базы<br> </label>
-            <input name="udel" type="text" placeholder="Введите ID"><br>
-            <input type="submit" name="gotdel" value="Удалить"><br>
-        </form>
-    </div>
-    <p></p>
+
 </center>
+<script>
+    let table = document.getElementById('mytable')
+    let nameinput = document.getElementById('nameinput')
+    let serilalinput = document.getElementById('serialinput')
+    let xinput = document.getElementById('xinput')
+    let yinput = document.getElementById('yinput')
+    let objectinput = document.getElementById('objectinput')
+    let removedinput = document.getElementById('removedinput')
+    const xhttp = new XMLHttpRequest()
+    xhttp.open("GET", "/admin/devices/get"+window.location.search, false)
+    xhttp.send()
+    let tableData = JSON.parse(xhttp.response)
+
+
+    function populateTable() {
+        table.innerHTML = '';
+        for (let data of tableData) {
+            let row = table.insertRow(-1);
+            let id = row.insertCell(0);
+            id.innerHTML = data.id;
+            let name = row.insertCell(1);
+            let href = document.createElement("a")
+            href.appendChild(document.createTextNode(data.name))
+            href.href = `/admin/devices/edit?id=${data.id}`
+            name.appendChild(href)
+            let serial = row.insertCell(2);
+            serial.innerHTML = data.serial;
+            let akey = row.insertCell(3);
+            akey.innerHTML = data.akey;
+            let x = row.insertCell(4);
+            x.innerHTML = data.x;
+            let y = row.insertCell(5);
+            y.innerHTML = data.y;
+            let object = row.insertCell(6);
+            object.innerHTML = data.object;
+            let removed = row.insertCell(7);
+            removed.innerHTML = data.removed;
+            let del = row.insertCell(8);
+            let button = document.createElement("button")
+            button.innerHTML="Удалить"
+            button.onclick = function () {
+                x = new XMLHttpRequest()
+                x.open("DELETE",`/admin/devices?id=${data.id}`)
+                x.send()
+                location.reload()
+            }
+            del.appendChild(button)
+        }
+    }
+
+
+    populateTable();
+
+    function applyParams() {
+        let namefilter = nameinput.value;
+        let serialfilter = serilalinput.value;
+        let xfilter = xinput.value;
+        let yfilter = yinput.value;
+        let objectfilter = objectinput.value;
+        let removedfilter = removedinput.value;
+        window.location.href=`/admin/devices?name=${namefilter}&serial=${serialfilter}&x=${xfilter}&y=${yfilter}&object=${objectfilter}&removed=${removedfilter}`;
+    }
+    let current_page=1
+    let url = "/admin/devices/getNumberOfPages"
+    if (window.location.search.length!=0) {
+        url+=window.location.search;
+    }else {
+        url += "?name=&serial=&x=&y=&object=&removed="
+    }
+    xhttp.open("GET",url,false);
+    xhttp.send();
+    let numPages=Number(xhttp.response)
+    let page_span = document.getElementById("page");
+    page_span.innerHTML = 1+"/"+numPages;
+    let btn_next = document.getElementById("btn_next");
+    if (1 == numPages) {
+        btn_next.style.visibility = "hidden";
+    }
+    function prevPage()
+    {
+        if (current_page > 1) {
+            current_page--;
+            changePage(current_page);
+        }
+    }
+
+    function nextPage()
+    {
+        if (current_page < numPages) {
+            current_page++;
+            changePage(current_page);
+        }
+    }
+    function changePage(page) {
+        let btn_prev = document.getElementById("btn_prev");
+        url="/admin/devices/get"
+        if (window.location.search.length!=0) {
+            url+=window.location.search;
+        }else {
+            url += "?name=&serial=&x=&y=&object=&removed="
+        }
+        url+="&page="+page
+
+        xhttp.open("GET",url,false)
+        xhttp.send()
+        tableData=JSON.parse(xhttp.response)
+        console.log(tableData)
+        populateTable()
+
+        page_span.innerHTML = page+"/"+numPages;
+
+        if (page == 1) {
+            btn_prev.style.visibility = "hidden";
+        } else {
+            btn_prev.style.visibility = "visible";
+        }
+
+        if (page == numPages) {
+            btn_next.style.visibility = "hidden";
+        } else {
+            btn_next.style.visibility = "visible";
+        }
+    }
+
+</script>
 </body>
 </html>

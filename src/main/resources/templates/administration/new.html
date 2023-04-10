@@ -5,14 +5,22 @@
     <title>New Admin</title>
 </head>
 <body>
-
+<a href="/admin/edit">
+    <input type="submit" value="Назад">
+</a>
 <form th:method="POST" th:action="@{edit}" th:object="${admin}">
     <label for="username">Введите username</label>
     <input type="text" th:field="*{username}" id="username"> <br>
     <label for="password">Введите пароль</label>
     <input type="text" th:field="*{password}" id="password"><br>
     <label for="fio">Введите ФИО</label>
-    <input type="text" th:field="*{fio}" id="fio">
+    <input type="text" th:field="*{fio}" id="fio"><br>
+    <label for="role">Выберите роль</label>
+    <select th:field="*{role}" id="role">
+        <option th:each="role : ${roles}"
+                th:value="${role}"
+                th:text="${role}">Wireframe</option>
+    </select>
     <br>
     <input type="submit" value="Создать">
 </form>

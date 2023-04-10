@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit device</title>
+</head>
+<body>
+<a href="/admin/devices">
+    <input type="submit" value="Назад">
+</a>
+<div>
+    <form th:method="PATCH" action="/admin/devices" th:object="${device}">
+        <label>
+            Обновить данные приборов <br>
+        </label>
+        <input type="hidden" th:field="${device.id}">
+        <input type="text" placeholder="Введите новое наименование " th:field="*{name}"> <br>
+        <input type="text" placeholder="Введите новый серийный номер " th:field="*{serial}"> <br>
+        <input type="text" placeholder="Введите новый ключ доступа " th:field="*{akey}"> <br>
+        <input type="text" placeholder="Введите новую координату Х " th:field="*{x}"> <br>
+        <input type="text" placeholder="Введите новую координату У " th:field="*{y}"> <br>
+        <input placeholder="Выберите новый объект размещения" list="" name="object" id="object2" autocomplete="off"> <br>
+        <datalist id="objects2"></datalist>
+        <input type="submit" value="Обновить">
+    </form>
+</div>
+</body>
+<script>
+    let xhttp = new XMLHttpRequest()
+    let object2 = document.getElementById("object2")
+    let objects2 = document.getElementById("objects2")
+    xhttp.open("GET","/admin/objects/get",false)
+    xhttp.send()
+    let objectsData = JSON.parse(xhttp.response)
+    for(let object of objectsData) {
+        let node2 = document.createElement("option")
+        node2.value=object.name
+        node2.appendChild(document.createTextNode(object.name))
+        document.getElementById("objects2").appendChild(node2)
+    }
+    object2.oninput = function() {
+        let text = object2.value.toUpperCase();
+        for (let option of objects2.options) {
+            if(option.value.toUpperCase().indexOf(text) > -1){
+                option.style.display = "block";
+            }else{
+                option.style.display = "none";
+            }
+        };
+    }
+    object2.onfocus = function () {
+        objects2.style.display = 'block';
+        object2.style.borderRadius = "5px 5px 0 0";
+    };
+    for (let option of objects2.options) {
+        option.onclick = function () {
+            object2.value = option.value;
+            objects2.style.display = 'none';
+            object2.style.borderRadius = "5px";
+        }
+    };
+</script>
+</html>

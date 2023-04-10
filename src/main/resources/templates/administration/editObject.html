@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit object</title>
+</head>
+<body>
+<a href="/admin/objects">
+  <input type="submit" value="Назад">
+</a>
+<form th:method="PATCH" action="/admin/objects" th:object="${place}">
+  <label>
+    Обновление объекта размещения <br>
+  </label>
+  <input type="hidden" th:field="*{id}">
+  <label for="name">Введите новое наименование </label>
+  <input type="text" placeholder="Введите новое наименование " th:field="*{name}" id="name"> <br>
+  <label for="lat">Введите новую широту</label>
+  <input type="text" placeholder="Введите новую широту " th:field="*{lat}" id="lat"> <br>
+  <label for="lon">Введите новую долготу</label>
+  <input type="text" placeholder="Введите новую долготу " th:field="*{lon}" id="lon"> <br>
+  <input type="submit" value="Обновить">
+</form>
+</body>
+</html>

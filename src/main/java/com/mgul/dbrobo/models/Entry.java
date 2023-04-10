@@ -59,4 +59,5 @@ public class Entry {
     public void setSerial(String serial) {
         this.serial = serial;
     }
+
 }

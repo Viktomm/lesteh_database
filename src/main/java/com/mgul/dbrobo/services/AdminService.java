@@ -1,8 +1,11 @@
 package com.mgul.dbrobo.services;
 
 import com.mgul.dbrobo.exceptions.AdminNotFoundException;
+import com.mgul.dbrobo.exceptions.LastAdminException;
+import com.mgul.dbrobo.exceptions.WrongPasswordException;
 import com.mgul.dbrobo.models.Admin;
 import com.mgul.dbrobo.repositories.AdminRepository;
+import com.mgul.dbrobo.utils.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,7 +37,13 @@ public class AdminService {
     @Transactional
     public void delete(String id) {
         Optional<Admin> adm = adminRepository.findById(id);
-        if (adm.isPresent()) adminRepository.delete(adm.get());
+        if (adm.isPresent()) {
+            if (adm.get().getRole().equals("ROLE_ADMIN") && adminRepository.findByRole("ROLE_ADMIN").size()==1) {
+                throw new LastAdminException("This is the last admin in database");
+            } else {
+                adminRepository.delete(adm.get());
+            }
+        }
             else throw new AdminNotFoundException("No admin with such id");
     }
 
@@ -44,6 +53,7 @@ public class AdminService {
         if (newAdminData.getUsername()!=null) a.setUsername(newAdminData.getUsername());
         if (!newAdminData.getPassword().isEmpty()) a.setPassword(newAdminData.getPassword());
         if (newAdminData.getFio()!=null) a.setFio(newAdminData.getFio());
+        a.setRole(newAdminData.getRole());
         adminRepository.save(a);
     }
 }
