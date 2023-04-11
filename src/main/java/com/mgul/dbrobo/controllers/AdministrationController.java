@@ -59,8 +59,6 @@ public class AdministrationController {
     public String editSomeone(Model model,@PathVariable String id) {
         model.addAttribute(adminService.findById(id));
         model.addAttribute("roles", Roles.values());
-        String obj = new String();
-        model.addAttribute("passcopy",obj);
         return "/administration/update";
     }
 
@@ -71,7 +69,10 @@ public class AdministrationController {
     }
 
     @PostMapping("/edit")
-    public String createAdmin(@ModelAttribute("admin") Admin admin, Model model){
+    public String createAdmin(@ModelAttribute("admin") Admin admin,@RequestParam String passcopy, Model model){
+        if (!admin.getPassword().equals(passcopy)) {
+            throw new WrongPasswordException("Пароли не совпадают");
+        }
         adminService.save(admin);
         return "redirect:/admin/edit";
     }
@@ -79,8 +80,8 @@ public class AdministrationController {
     @PatchMapping("/edit/{id}")
     public String updateSomeone(@PathVariable String id,
                                         @ModelAttribute("admin") Admin admin,
-                                @ModelAttribute("passcopy") String passCopy) {
-        if (!admin.getPassword().equals(passCopy)) {
+                                @RequestParam String passcopy) {
+        if (!admin.getPassword().equals(passcopy)) {
             throw new WrongPasswordException("Пароли не совпадают");
         }
         adminService.update(id,admin);
@@ -222,9 +223,6 @@ public class AdministrationController {
         calibrationService.save(calibrationDTO);
         return "redirect:/admin/calibration";
     }
-
-
-
     @GetMapping("/calibration")
     public String getCalibration() {
         return "administration/calibr";
