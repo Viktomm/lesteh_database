@@ -95,7 +95,7 @@ public class DeviceService {
     public List<Device> findByParams(String name, String serial, String x, String y, String object, String removed,int page) {
         List<Device> ans = getDeviceList(name, serial, x, y, object, removed);
         int startOfPage = (page-1)*pageSize;
-        int endOfPage = (startOfPage+pageSize >= ans.size())? ans.size() : startOfPage+pageSize;
+        int endOfPage = Math.min(startOfPage + pageSize, ans.size());
         return (ans.size()==0)? ans : ans.subList(startOfPage,endOfPage);
     }
 

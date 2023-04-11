@@ -71,7 +71,7 @@ public class AdministrationController {
     }
 
     @PostMapping("/edit")
-    public String createAdmin(@ModelAttribute("admin") Admin admin, Model model){
+    public String createAdmin(@ModelAttribute("admin") Admin admin, Model model) {
         adminService.save(admin);
         return "redirect:/admin/edit";
     }
@@ -114,6 +114,7 @@ public class AdministrationController {
     public String getDevices(@ModelAttribute("device") Device device) {
         return "administration/devices";
     }
+
     @GetMapping(value = "/devices",params = {"name","serial","x","y","object","removed"})
     public String getDevicesWithParams(@RequestParam String name,@RequestParam String serial,@RequestParam String x,
                                        @RequestParam String y,@RequestParam String object,@RequestParam String removed,@RequestParam(defaultValue = "1") int page,Model model) {
