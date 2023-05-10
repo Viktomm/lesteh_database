@@ -22,6 +22,6 @@ public class AdminDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return adminRepository.findByUsername(username)
                 .map(AdminDetails::new)
-                .orElseThrow(()->new UsernameNotFoundException("Admin with such username not found"));
+                .orElseThrow(()->new UsernameNotFoundException("name"));
     }
 }

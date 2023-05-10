@@ -1,29 +1,38 @@
 package com.mgul.dbrobo.controllers;
 
+import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.exceptions.WrongPasswordException;
 import com.mgul.dbrobo.models.*;
 import com.mgul.dbrobo.repositories.CalibrationRepository;
 import com.mgul.dbrobo.repositories.PlaceRepository;
-import com.mgul.dbrobo.services.AdminService;
-import com.mgul.dbrobo.services.CalibrationService;
-import com.mgul.dbrobo.services.DeviceService;
-import com.mgul.dbrobo.services.EntryService;
+import com.mgul.dbrobo.security.AdminDetails;
+import com.mgul.dbrobo.services.*;
 import com.mgul.dbrobo.services.generators.SequenceGeneratorService;
 import com.mgul.dbrobo.utils.Roles;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.CredentialsContainer;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/admin")
 public class AdministrationController {
     private final AdminService adminService;
@@ -38,8 +47,12 @@ public class AdministrationController {
 
     private final CalibrationService calibrationService;
 
+    private final AdminDetailsService adminDetailsService;
+
     @Autowired
-    public AdministrationController(AdminService adminService, DeviceService deviceService, PlaceRepository placeRepository, SequenceGeneratorService sequenceGeneratorService, CalibrationRepository calibrationRepository, EntryService entryService, CalibrationService calibrationService) {
+    public AdministrationController(AdminService adminService, DeviceService deviceService, PlaceRepository placeRepository,
+                                    SequenceGeneratorService sequenceGeneratorService, CalibrationRepository calibrationRepository,
+                                    EntryService entryService, CalibrationService calibrationService, AdminDetailsService adminDetailsService) {
         this.adminService = adminService;
         this.deviceService = deviceService;
         this.placeRepository = placeRepository;
@@ -47,12 +60,29 @@ public class AdministrationController {
         this.calibrationRepository = calibrationRepository;
         this.entryService = entryService;
         this.calibrationService = calibrationService;
+        this.adminDetailsService = adminDetailsService;
+    }
+
+    @GetMapping("/checkout")
+    @ResponseBody
+    public String getAdmForCheckout(@RequestParam("username") String name, @RequestParam("password") String password)
+        throws BadCredentialsException {
+        UserDetails adm = adminDetailsService.loadUserByUsername(name);
+        if (!password.equals(adm.getPassword())) {
+            throw new BadCredentialsException("password");
+        }
+        return "Ok";
+    }
+
+    @ExceptionHandler
+    private String handleException(AuthenticationException e) {
+        return e.getMessage();
     }
 
     @GetMapping("/edit")
-    public String getAdminEditPage(Model model) {
-        model.addAttribute("admins",adminService.findAll());
-        return "administration/edit";
+    public List<Admin> getAdminEditPage() {
+        List<Admin> listOfAdm = adminService.findAll();
+        return listOfAdm;
     }
 
     @GetMapping("/edit/{id}")
@@ -69,7 +99,6 @@ public class AdministrationController {
     }
 
     @PostMapping("/edit")
-
     public String createAdmin(@ModelAttribute("admin") Admin admin,@RequestParam String passcopy, Model model){
         if (!admin.getPassword().equals(passcopy)) {
             throw new WrongPasswordException("Пароли не совпадают");

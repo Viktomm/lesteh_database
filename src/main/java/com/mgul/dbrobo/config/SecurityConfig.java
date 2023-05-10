@@ -27,16 +27,17 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf->csrf.disable())
                 .authorizeHttpRequests(auth -> {
-                    auth.requestMatchers("/admin/edit/**").hasRole("ADMIN");
-                    auth.requestMatchers("/admin/devices/**","/admin/objects/**").hasAnyRole("ADMIN","MODERATOR");
-                    auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
+                    auth.requestMatchers("/sosi/edit/**").hasRole("ADMIN");
+                    auth.requestMatchers("/sosi/devices/**","/admin/objects/**").hasAnyRole("ADMIN","MODERATOR");
+                    auth.requestMatchers("/sosi/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().defaultSuccessUrl("/admin",true).failureUrl("/login?error").and()
+                .formLogin().defaultSuccessUrl("/sosi",true).failureUrl("/login?error")
+                .and()
                 .logout().logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .and()
-                .exceptionHandling().accessDeniedPage("/admin/accessDenied")
+                .exceptionHandling().accessDeniedPage("/sosi/accessDenied")
                 .and()
                 .userDetailsService(adminDetailsService)
                 .headers(headers->headers.frameOptions().sameOrigin())
