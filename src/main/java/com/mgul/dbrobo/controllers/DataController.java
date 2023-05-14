@@ -1,6 +1,7 @@
 package com.mgul.dbrobo.controllers;
 
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
+import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
@@ -41,11 +42,17 @@ public class DataController {
 
     @ExceptionHandler
     private ResponseEntity<String> handleException(WrongAKeyException e) {
-        // в HTTP ответе будет тело (String) и статут в заголовке
+        // в HTTP ответе будет тело (String) и статус в заголовке
         return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
     }
 
-    @GetMapping(value = "/deb.php/text") //
+    @GetMapping("/devices")
+    @ResponseBody
+    public Map<Long, String> getAllDevicesInMap() {
+        return deviceService.findAllWithIdAndName();
+    }
+
+    @GetMapping(value = "/deb.php", params = {"fileback"})
     public Map<String, Entry> loadDataBetweenTextJSON
             (@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime sdate) {
@@ -53,18 +60,13 @@ public class DataController {
                 sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 
-    @GetMapping("/devices")
-    public List<String> getAllDeviceNames() {
-        return deviceService.findAllDeviceName();
-    }
-
-    @GetMapping(value = "/deb.php/log.csv")
+    @GetMapping(value = "/deb.php", params = {"manualmode"})
     public String loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                                  LocalDateTime sdate,
-                                             @RequestParam("deviceName") String deviceName) {
-        String csv = entryService.getDataBetweenCSV(fdate, sdate, deviceName);
+                                             @RequestParam("unitid") Long deviceId) {
+        String csv = entryService.getDataBetweenCSV(fdate, sdate, deviceId);
         return csv;
     }
 }

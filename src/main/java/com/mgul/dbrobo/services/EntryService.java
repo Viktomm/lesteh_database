@@ -114,12 +114,14 @@ public class EntryService {
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
-    public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
+    public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
 
+        String deviceName = deviceRepository.findById(deviceId).get().getName();
         List<Entry> result = entryRepository.findByuNameAndDateForCalculationBetween(deviceName, fdate, sdate);
 
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
+        if (result.stream().findAny().isEmpty()) return "\uFEFFЗаписей не найдено"; // FIXME: 15.05.2023 Сделать баля по-человечески баля
         Entry entryFirst = result.stream().findAny().get();
         JsonNode jsonTree = mapper.valueToTree(entryFirst);
         JsonNode jsonNodeData = jsonTree.get("data");

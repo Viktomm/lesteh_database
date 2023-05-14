@@ -10,6 +10,7 @@ import com.mgul.dbrobo.repositories.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,7 +32,13 @@ public class DeviceService {
         this.entryRepository = entryRepository;
     }
 
-    public List<String> findAllDeviceName() { return deviceRepository.findAll().stream().map(x -> x.getName()).toList();}
+    public List<Long> findAllDeviceName() { return deviceRepository.findAll().stream().map(x -> x.getId()).toList();}
+
+    public Map<Long, String> findAllWithIdAndName() {
+        Map<Long, String> map = new LinkedHashMap<>();
+        deviceRepository.findAll(Sort.by("Id")).stream().forEach(x -> map.put(x.getId(), x.getName()));
+        return map;
+    }
 
     public List<Device> findAll() { return deviceRepository.findAll();}
     @Transactional
