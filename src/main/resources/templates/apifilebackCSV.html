@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<form th:object="${time}" th:action="@{/core/deb.php/log.csv}" th:method="get">
+<form th:object="${time}" th:action="@{/mongo/core/deb.php/log.csv}" th:method="get">
     <input type="hidden" name="fdate" th:value="${fdate}">
     <input type="hidden" name="sdate" th:value="${sdate}">
     <label for="dropDownList">Выберите прибор:</label>
