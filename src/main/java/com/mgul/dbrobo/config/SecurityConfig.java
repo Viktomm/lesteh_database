@@ -32,9 +32,9 @@ public class SecurityConfig {
                     auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().loginProcessingUrl("/mongo/login").defaultSuccessUrl("/admin",true).failureUrl("/login?error").and()
-                .logout().logoutUrl("/logout")
-                .logoutSuccessUrl("/")
+                .formLogin().loginProcessingUrl("/mongo/login").defaultSuccessUrl("/mongo/admin",true).failureUrl("/mongo/login?error").and()
+                .logout().logoutUrl("/mongo/logout")
+                .logoutSuccessUrl("/mongo")
                 .and()
                 .exceptionHandling().accessDeniedPage("/admin/accessDenied")
                 .and()
