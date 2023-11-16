@@ -16,12 +16,12 @@
     </style>
 </head>
 <body>
-<a href="/admin">
+<a href="/mongo/admin">
     <input type="submit" value="Назад">
 </a>
 <center>
     <div style="display: inline-block; margin-left: 0px; vertical-align: middle;">
-        <form th:method="GET" th:action="@{devices/new}">
+        <form th:method="GET" th:action="@{mongo/devices/new}">
             <input type="submit" value="Добавить прибор">
         </form>
     </div>
@@ -91,7 +91,7 @@
     let objectinput = document.getElementById('objectinput')
     let removedinput = document.getElementById('removedinput')
     const xhttp = new XMLHttpRequest()
-    xhttp.open("GET", "/admin/devices/get"+window.location.search, false)
+    xhttp.open("GET", "/mongo/admin/devices/get"+window.location.search, false)
     xhttp.send()
     let tableData = JSON.parse(xhttp.response)
 
@@ -105,7 +105,7 @@
             let name = row.insertCell(1);
             let href = document.createElement("a")
             href.appendChild(document.createTextNode(data.name))
-            href.href = `/admin/devices/edit?id=${data.id}`
+            href.href = `/mongo/admin/devices/edit?id=${data.id}`
             name.appendChild(href)
             let serial = row.insertCell(2);
             serial.innerHTML = data.serial;
@@ -124,7 +124,7 @@
             button.innerHTML="Удалить"
             button.onclick = function () {
                 x = new XMLHttpRequest()
-                x.open("DELETE",`/admin/devices?id=${data.id}`)
+                x.open("DELETE",`/mongo/admin/devices?id=${data.id}`)
                 x.send()
                 location.reload()
             }
@@ -142,10 +142,10 @@
         let yfilter = yinput.value;
         let objectfilter = objectinput.value;
         let removedfilter = removedinput.value;
-        window.location.href=`/admin/devices?name=${namefilter}&serial=${serialfilter}&x=${xfilter}&y=${yfilter}&object=${objectfilter}&removed=${removedfilter}`;
+        window.location.href=`/mongo/admin/devices?name=${namefilter}&serial=${serialfilter}&x=${xfilter}&y=${yfilter}&object=${objectfilter}&removed=${removedfilter}`;
     }
     let current_page=1
-    let url = "/admin/devices/getNumberOfPages"
+    let url = "/mongo/admin/devices/getNumberOfPages"
     if (window.location.search.length!=0) {
         url+=window.location.search;
     }else {
@@ -177,7 +177,7 @@
     }
     function changePage(page) {
         let btn_prev = document.getElementById("btn_prev");
-        url="/admin/devices/get"
+        url="/mongo/admin/devices/get"
         if (window.location.search.length!=0) {
             url+=window.location.search;
         }else {

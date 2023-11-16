@@ -16,7 +16,7 @@
     </style>
 </head>
 <body>
-<a href="/admin">
+<a href="/mongo/admin">
     <input type="submit" value="Назад">
 </a>
 <center>
@@ -54,10 +54,10 @@
     let xhttp = new XMLHttpRequest()
     let unit = document.getElementById("unitid")
     let checkbox = document.getElementById("all")
-    xhttp.open("GET","/admin/devices/getall",false)
+    xhttp.open("GET","/mongo/admin/devices/getall",false)
     xhttp.send()
     let devices = JSON.parse(xhttp.response)
-    xhttp.open("GET","/admin/calibration/get",false)
+    xhttp.open("GET","/mongo/admin/calibration/get",false)
     xhttp.send()
     let calibrationData = JSON.parse(xhttp.response)
     console.log(calibrationData)
@@ -73,7 +73,7 @@
     unit.onchange = function () {
         document.getElementById("test").textContent= unit.options[unit.selectedIndex].text.replace("::"," ");
         xhttp=new XMLHttpRequest()
-        xhttp.open("GET","/admin/devices?uid="+unit.options[unit.selectedIndex].value,false)
+        xhttp.open("GET","/mongo/admin/devices?uid="+unit.options[unit.selectedIndex].value,false)
         xhttp.send()
         sensors = JSON.parse(xhttp.responseText)
         updateTable()
@@ -90,7 +90,7 @@
             let name = row.insertCell(0);
             let link = document.createElement("a")
             link.appendChild(document.createTextNode(sensor))
-            link.href = `/admin/calibration?name=${unit.options[unit.selectedIndex].text}&sensor=${sensor}`
+            link.href = `/mongo/admin/calibration?name=${unit.options[unit.selectedIndex].text}&sensor=${sensor}`
             name.appendChild(link)
             let flag=false;
             for(let cal of calibrationData) {

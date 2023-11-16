@@ -5,10 +5,10 @@
     <title>Add new calibration</title>
 </head>
 <body>
-<a href="/admin/calibration">
+<a href="/mongo/admin/calibration">
     <input type="submit" value="Назад">
 </a>
-<form th:method="PUT" th:action="@{calibration}" th:object="${dto}" >
+<form th:method="PUT" th:action="@{mongo/calibration}" th:object="${dto}" >
     <input type="hidden" th:field="*{name}">
     <input type="hidden" th:field="*{sensor}">
     <label>Выберите n:</label> <br>

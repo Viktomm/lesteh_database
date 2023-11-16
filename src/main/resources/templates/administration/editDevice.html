@@ -5,11 +5,11 @@
     <title>Edit device</title>
 </head>
 <body>
-<a href="/admin/devices">
+<a href="/mongo/admin/devices">
     <input type="submit" value="Назад">
 </a>
 <div>
-    <form th:method="PATCH" action="/admin/devices" th:object="${device}">
+    <form th:method="PATCH" action="/mongo/admin/devices" th:object="${device}">
         <label>
             Обновить данные приборов <br>
         </label>
@@ -29,7 +29,7 @@
     let xhttp = new XMLHttpRequest()
     let object2 = document.getElementById("object2")
     let objects2 = document.getElementById("objects2")
-    xhttp.open("GET","/admin/objects/get",false)
+    xhttp.open("GET","/mongo/admin/objects/get",false)
     xhttp.send()
     let objectsData = JSON.parse(xhttp.response)
     for(let object of objectsData) {
