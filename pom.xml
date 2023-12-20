@@ -79,7 +79,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <imageName>
-                        martovoi/dbrobo-mongodb:spring-plugin
+                        martovoi/dbrobo-java:spring-plugin
                     </imageName>
                     <excludes>
                         <exclude>
