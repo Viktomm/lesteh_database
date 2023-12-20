@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Add device</title>
@@ -36,7 +36,7 @@
 <a href="/admin/devices">
   <input type="submit" value="Назад">
 </a>
-<form th:method="POST" action="/admin/devices" th:object="${newDev}">
+<form th:method="POST" action="/mongo/admin/devices" th:object="${newDev}">
   <label>
     Добавить новый прибор <br>
   </label>
@@ -54,7 +54,7 @@
   let xhttp = new XMLHttpRequest()
   let objects = document.getElementById("objects")
   let object1 = document.getElementById("object1")
-  xhttp.open("GET","/admin/objects/get",false)
+  xhttp.open("GET","/mongo/admin/objects/get",false)
   xhttp.send()
   let objectsData = JSON.parse(xhttp.response)
   for(let object of objectsData) {

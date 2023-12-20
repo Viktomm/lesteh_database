@@ -5,11 +5,11 @@
     <title>Title</title>
 </head>
 <body>
-<a href="/admin">
+<a href="/mongo/admin">
     <input type="submit" value="Назад">
 </a>
 <center>
-    <form enctype="multipart/form-data" th:method="POST" th:action="@{insert}">
+    <form enctype="multipart/form-data" th:method="POST" th:action="@{mongo/insert}">
         Введите данные в формате JSON: <br>
         <input type="file" name="file" accept=".json,.txt,.log">
         <input type="submit" value="Отправить">
