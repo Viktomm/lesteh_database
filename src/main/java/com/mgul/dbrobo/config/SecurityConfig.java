@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 
 
 @Configuration
@@ -32,7 +31,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().loginProcessingUrl("/login").defaultSuccessUrl("/mongo/admin",true).failureUrl("/mongo/login?error").and()
+                .formLogin().loginProcessingUrl("/mongo/login").defaultSuccessUrl("/mongo/admin",true).failureUrl("/mongo/login?error").and()
                 .logout().logoutUrl("/mongo/logout")
                 .logoutSuccessUrl("/mongo")
                 .and()
