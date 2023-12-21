@@ -31,7 +31,7 @@ public class SecurityConfig {
                     auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().loginPage("/jopa").loginProcessingUrl("/mongo/login").defaultSuccessUrl("/mongo/admin",true).failureUrl("/mongo/login?error").and()
+                .formLogin().loginPage("/jopa").loginProcessingUrl("/mongo/govno").defaultSuccessUrl("/mongo/admin",true).failureUrl("/mongo/login?error").and()
                 .logout().logoutUrl("/mongo/logout")
                 .logoutSuccessUrl("/mongo")
                 .and()
