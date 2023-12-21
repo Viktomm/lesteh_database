@@ -8,7 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 
 @Controller
 public class BasicController {
@@ -42,8 +44,8 @@ public class BasicController {
         return "/administration/admin";
     }
 
-    @PostMapping("/login")
-    public void checkPostLogin() {
-        System.out.println("\tLOGGIN CHECKKK\t");
-    }
+//    @PostMapping("/login")
+//    public void checkPostLogin() {
+//        System.out.println("\tLOGGIN CHECKKK\t");
+//    }
 }
