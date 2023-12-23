@@ -41,11 +41,6 @@ public class BasicController {
 
     @GetMapping("/admin")
     public String getAdminPage() {
-        return "/administration/admin";
+        return "administration/admin";
     }
-
-//    @PostMapping("/login")
-//    public void checkPostLogin() {
-//        System.out.println("\tLOGGIN CHECKKK\t");
-//    }
 }
