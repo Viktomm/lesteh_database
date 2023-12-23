@@ -31,15 +31,28 @@ public class SecurityConfig {
                     auth.requestMatchers("/admin/**").hasAnyRole("ADMIN","MODERATOR","HELPER");
                     auth.anyRequest().permitAll();
                 })
-                .formLogin().loginProcessingUrl("/login").defaultSuccessUrl("/mongo/admin",true).failureUrl("/login?error").and()
-                .logout().logoutUrl("/mongo/logout")
-                .logoutSuccessUrl("/mongo")
+                .formLogin()
+                    // .loginPage("") отвечает за url, куда перенаправят пользователя для аутентификации
+                    // при использовании директивы, spring забивает хуй на всю обработку по-умолчанию и делегирует работу приложению
+                    // очень похоже на то, что происходит в классе с конструктором по-умолчанию, когда создаем какой-то свой
+                    .loginProcessingUrl("/login") // директива отвечает за url куда будет послан POST-запрос с введенными в форму кредами
+                    // не ставим тут /mongo, т.к. директива отвечает за url, куда будет послан запрос, и где spring ожидает его поймать
+                    // т.к. /mongo срезается nginx'ом на входе, spring никогда не получит креды по /mongo/login
+                    // иначе говоря, посылаются креды по /mongo/login а ловятся уже по /login, но обработчик висит на /mongo/login
+                    // вместо этого замутили ещё один location в nginx
+                    .defaultSuccessUrl("/mongo/admin",true)
+                    .failureUrl("/login?error") // аналогично не ставим /mongo тут
                 .and()
-                .exceptionHandling().accessDeniedPage("/admin/accessDenied")
+                    .logout()
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/mongo")
                 .and()
-                .userDetailsService(adminDetailsService)
-                .headers(headers->headers.frameOptions().sameOrigin())
-                .httpBasic(Customizer.withDefaults())
+                    .exceptionHandling()
+                    .accessDeniedPage("/admin/accessDenied")
+                .and()
+                    .userDetailsService(adminDetailsService)
+                    .headers(headers->headers.frameOptions().sameOrigin())
+                    .httpBasic(Customizer.withDefaults())
                 .build();
     }
 
