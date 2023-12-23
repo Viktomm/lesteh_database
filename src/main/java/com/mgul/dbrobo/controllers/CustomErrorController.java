@@ -17,14 +17,14 @@ public class CustomErrorController implements ErrorController {
 
     @RequestMapping("/error")
     @ResponseBody
-    public Map<String, String> handleError(HttpServletRequest httpServletRequest) {
-        LinkedHashMap<String, String> map = new LinkedHashMap<>();
+    public Map<String, Object> handleError(HttpServletRequest httpServletRequest) {
+        LinkedHashMap<String, Object> map = new LinkedHashMap<>();
         map.put("error exception", (String) httpServletRequest.getAttribute(RequestDispatcher.ERROR_EXCEPTION));
         map.put("error exception type", (String) httpServletRequest.getAttribute(RequestDispatcher.ERROR_EXCEPTION_TYPE));
         map.put("error message", (String) httpServletRequest.getAttribute(RequestDispatcher.ERROR_MESSAGE));
         map.put("error request uri", (String) httpServletRequest.getAttribute(RequestDispatcher.ERROR_REQUEST_URI));
         map.put("error servlet name", (String) httpServletRequest.getAttribute(RequestDispatcher.ERROR_SERVLET_NAME));
-//        map.put("error status code", (Integer) httpServletRequest.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
+        map.put("error status code", (Integer) httpServletRequest.getAttribute(RequestDispatcher.ERROR_STATUS_CODE));
         map.put("method", httpServletRequest.getMethod());
         map.put("forward request uri", (String) httpServletRequest.getAttribute(RequestDispatcher.FORWARD_REQUEST_URI));
         return map;
