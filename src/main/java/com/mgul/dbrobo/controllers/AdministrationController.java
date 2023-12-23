@@ -59,13 +59,13 @@ public class AdministrationController {
     public String editSomeone(Model model,@PathVariable String id) {
         model.addAttribute(adminService.findById(id));
         model.addAttribute("roles", Roles.values());
-        return "/administration/update";
+        return "administration/update";
     }
 
     @GetMapping("/new")
     public String newPage(@ModelAttribute("admin") Admin admin,Model model) {
         model.addAttribute("roles", Roles.values());
-        return "/administration/new";
+        return "administration/new";
     }
 
     @PostMapping("/edit")
