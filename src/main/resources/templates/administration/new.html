@@ -5,10 +5,10 @@
     <title>New Admin</title>
 </head>
 <body>
-<a href="/admin/edit">
+<a href="/mongo/admin/edit">
     <input type="submit" value="Назад">
 </a>
-<form th:method="POST" th:action="@{mongo/edit}" th:object="${admin}">
+<form th:method="POST" th:action="@{/mongo/admin/edit}" th:object="${admin}">
     <label for="username">Введите username</label>
     <input type="text" th:field="*{username}" id="username"> <br>
     <label for="password">Введите пароль</label>

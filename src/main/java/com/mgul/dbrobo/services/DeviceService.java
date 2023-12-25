@@ -38,6 +38,7 @@ public class DeviceService {
         if (isPlaceCorrect(device.getObject())) {
             deviceRepository.insert(device);
         } else {
+            // FIXME: создать человеческое исключение на отсутствие объекта размечения
             throw new DeviceNotFoundException("No such object in database");
         }
     }

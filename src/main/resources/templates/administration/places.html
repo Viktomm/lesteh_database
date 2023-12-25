@@ -44,12 +44,12 @@
       <tr th:each="object : ${objects}">
         <td th:text="${object.id}"></td>
         <td>
-          <a th:href="@{mongo/objects/{id}(id=${object.getId()})}" th:text="${object.name}">name</a>
+          <a th:href="@{objects/{id}(id=${object.getId()})}" th:text="${object.name}">name</a>
         </td>
         <td th:text="${object.lat}"></td>
         <td th:text="${object.lon}"></td>
         <td>
-          <form th:method="DELETE" th:action="@{mongo/objects/{id}(id=${object.getId()})}">
+          <form th:method="DELETE" th:action="@{objects/{id}(id=${object.getId()})}">
             <input type="submit" value="Удалить">
           </form>
         </td>
