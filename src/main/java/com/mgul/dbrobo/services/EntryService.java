@@ -112,7 +112,7 @@ public class EntryService {
     }
 
     public List<Entry> firstTenEntries() {
-        return entryRepository.findAll(PageRequest.of(0,2,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
+        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
