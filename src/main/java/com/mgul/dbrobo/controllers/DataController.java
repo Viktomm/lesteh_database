@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.controllers;
 
+import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.services.DeviceService;
@@ -12,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -52,15 +54,6 @@ public class DataController {
         }
     }
 
-    @GetMapping(value = "/deb.php/text") //
-    @ResponseBody
-    public Map<String, Entry> loadDataBetweenTextJSON
-            (@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
-             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
-        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
-    }
-
     @GetMapping( "/deb.php")
     public String getDataBetween(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                      LocalDateTime fdate,
@@ -81,18 +74,42 @@ public class DataController {
         }
     }
 
-    @GetMapping(value = "/deb.php/log.csv")
+    /**
+     * Обработка запроса на выдачу в JSON формате
+     */
+    @GetMapping(value = "/deb.php", params = {"fileback"})
+    @ResponseBody
+    public Map<String, Entry> loadDataBetweenTextJSON
+            (@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
+             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
+        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
+    }
+
+    /**
+     * Обработка запроса на выдачу в CSV формате
+     */
+    @GetMapping(value = "/deb.php", params = {"manualmode"})
     public ResponseEntity loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime sdate,
-                                             @RequestParam("deviceName") String deviceName) {
-        File file = entryService.getDataBetweenCSV(fdate, sdate, deviceName);
+                                             @RequestParam("deviceId") Long deviceId) {
+        String str = entryService.getDataBetweenCSV(fdate, sdate, deviceId);
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
-                .contentLength(file.length())
+                .contentLength(str.length())
                 .header("Content-Type", "text/csv; charset=utf-8")
-                .body(new FileSystemResource(file));
+                .body(str);
     }
 
+    @ExceptionHandler
+    private String handleException(EntryNotFoundException e, Model model) {
+        model.addAttribute("fdate", e.getFdate());
+        model.addAttribute("sdate", e.getSdate());
+        model.addAttribute("deviceId", e.getDeviceId());
+        model.addAttribute("devices", e.getAllDevices());
+        model.addAttribute("dataNotFound", e.getMessage());
+        return "apifilebackCSV";
+    }
 }

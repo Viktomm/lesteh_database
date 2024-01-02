@@ -22,7 +22,7 @@ public class DeviceService {
     private final PlaceRepository placeRepository;
 
     private final EntryRepository entryRepository;
-    private final int pageSize=3;
+    private final int pageSize = 10;
 
     @Autowired
     public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository) {

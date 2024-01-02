@@ -16,5 +16,5 @@ public interface EntryRepository extends MongoRepository<Entry,String> {
     List<Entry> findByDateForCalculationBetween(LocalDateTime start,LocalDateTime end);
 
     Entry findFirstByuNameAndSerial(String uName,String serial);
-    List<Entry> findByuNameAndDateForCalculationBetween(String uName, LocalDateTime start,LocalDateTime end);
+    List<Entry> findByuNameAndSerialAndDateForCalculationBetween(String uName, String serial, LocalDateTime start, LocalDateTime end);
 }

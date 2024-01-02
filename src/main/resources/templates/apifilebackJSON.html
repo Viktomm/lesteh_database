@@ -7,11 +7,11 @@
 <body>
 
 <button>
-    <a th:href="@{/mongo/core/deb.php/text(fdate=${fdate},sdate=${sdate})}">Посмотреть в браузере</a>
+    <a th:href="@{/mongo/core/deb.php(fdate=${fdate},sdate=${sdate},fileback=1)}">Посмотреть в браузере</a>
 </button>
 <br><br>
 <button>
-    <a th:href="@{/mongo/core/deb.php/text(fdate=${fdate},sdate=${sdate})}" download="log.txt" >Скачать json</a>
+    <a th:href="@{/mongo/core/deb.php(fdate=${fdate},sdate=${sdate},fileback=1)}" download="log.txt" >Скачать json</a>
 </button>
 </form>
 </body>

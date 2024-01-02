@@ -5,17 +5,22 @@
     <title>Title</title>
 </head>
 <body>
-<form th:object="${time}" th:action="@{/mongo/core/deb.php/log.csv}" th:method="get">
+<form th:object="${time}" th:action="@{/mongo/core/deb.php}" th:method="get">
     <input type="hidden" name="fdate" th:value="${fdate}">
     <input type="hidden" name="sdate" th:value="${sdate}">
+    <input type="hidden" name="manualmode" th:value="1">
     <label for="dropDownList">Выберите прибор:</label>
-    <select id="dropDownList" th:name="deviceName">
-        <option th:each="device : ${devices}" th:value="${device.getName()}" th:text="${device.getName()}"></option>
+    <select id="dropDownList" th:name="deviceId">
+        <option th:selected="${device.getId()}==${deviceId}"
+                th:each="device : ${devices}"
+                th:value="${device.getId()}"
+                th:text="${device.getName()} + ' ' + '(' + ${device.getSerial()} + ')'"></option>
     </select>
     <br>
     <div>
         <button type="submit" class="button">Скачать</button>
     </div>
 </form>
+<label th:text="${dataNotFound}">123</label>
 </body>
 </html>

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
@@ -23,15 +24,10 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
@@ -79,7 +75,7 @@ public class EntryService {
             //TODO:боже пофиксите кто-нибудь эту дату, я не  умею((
             if (entryData.containsKey("RTC")) {
                 try {
-                    String[] stringOfDates = (entryData.get("RTC").get("date")+":"+ entryData.get("RTC").get("time")).split("[:-]");
+                    String[] stringOfDates = (entryData.get("RTC").get("date") + ":" + entryData.get("RTC").get("time")).split("[:-]");
                     Integer[] dates = new Integer[6];
                     for (int i = 0; i < 6; i++) {
                         dates[i]=Integer.valueOf(stringOfDates[i]);
@@ -116,11 +112,20 @@ public class EntryService {
         //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
     }
 
-    public File getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, String deviceName) {
-        List<Entry> result = entryRepository.findByuNameAndDateForCalculationBetween(deviceName, fdate, sdate);
+    public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
+
+        Device device = deviceRepository.findById(deviceId).get();
+        List<Entry> result = entryRepository.findByuNameAndSerialAndDateForCalculationBetween(device.getName(), device.getSerial(), fdate, sdate);
+
+        if (result.stream().findAny().isEmpty()) throw new EntryNotFoundException(fdate, sdate,
+                deviceId, deviceRepository.findAll(),
+                "Записей по прибору " + device.getName() + " (" + device.getSerial() + ") не найдено");
+        // FIXME: 15.05.2023 Сделать баля по-человечески баля
+        // FIXME: 31.12.2023 Ничего баля не поменялось баля
 
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
+
         Entry entryFirst = result.stream().findAny().get();
         JsonNode jsonTree = mapper.valueToTree(entryFirst);
         JsonNode jsonNodeData = jsonTree.get("data");
@@ -128,14 +133,15 @@ public class EntryService {
         jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
         CsvMapper csvMapper = new CsvMapper();
-        try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8)) {
+        CharArrayWriter writer = new CharArrayWriter();
+        try {
             writer.write("\uFEFF");
             String headers = csvMapper
                     .writerFor(JsonNode.class)
                     .with(csvSchema)
                     .writeValueAsString(null);
 
-            writer.write(String.format("Прибор: ;%s;Интервал: ;%s; / ;%s;\n", deviceName,
+            writer.write(String.format("Прибор: ;%s;Интервал: ;%s; / ;%s;\n", device.getName() + " (" + device.getSerial() + ")",
                     fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                     sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
             writer.write(headers);
@@ -160,12 +166,14 @@ public class EntryService {
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
-            try (FileWriter writer = new FileWriter("src/main/resources/log.csv", StandardCharsets.UTF_8, true)) {
+            try {
                 writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
                         + str2.replaceAll("\\.", ","));
-            } catch (IOException ex) {throw new RuntimeException();}
+            } catch (IOException ex) {
+                throw new RuntimeException();
+            }
         }
-        return new File("src/main/resources/log.csv");
+        return writer.toString();
     }
 
     public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
