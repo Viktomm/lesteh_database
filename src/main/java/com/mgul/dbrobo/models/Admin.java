@@ -3,6 +3,8 @@ package com.mgul.dbrobo.models;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Objects;
+
 @Document(collection = "admins")
 public class Admin {
     @Id
@@ -51,5 +53,18 @@ public class Admin {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Admin admin = (Admin) o;
+        return Objects.equals(id, admin.id) && Objects.equals(username, admin.username) && Objects.equals(password, admin.password) && Objects.equals(fio, admin.fio) && Objects.equals(role, admin.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, password, fio, role);
     }
 }
