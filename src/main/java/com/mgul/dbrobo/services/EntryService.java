@@ -91,7 +91,7 @@ public class EntryService {
                 entry.setDateForCalculation(LocalDateTime.now());
                 entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now())));
             }
-            entry.setuName(deviceName);
+            entry.setUName(deviceName);
             entry.setSerial(deviceSerial);
             entry.setData(newEntryData);
             return entry;
@@ -108,9 +108,8 @@ public class EntryService {
         entryRepository.insert(entries);
     }
 
-    public List<Entry> firstTenEntries() {
-        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
-        //return entryRepository.findAll(Sort.by(Sort.Order.desc("createdAt"))).subList(0,2);
+    public List<Entry> lastTenEntries() {
+        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"dateForCalculation"))).toList();
     }
 
     public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
@@ -199,15 +198,11 @@ public class EntryService {
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream in = file.getInputStream();
             ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>> payload;
-            List<LinkedHashMap<String, LinkedHashMap<String, String>>> test=new ArrayList<>();
-            payload=objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>>>(){});
+            List<LinkedHashMap<String, LinkedHashMap<String, String>>> test = new ArrayList<>();
+            payload = objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>>>(){});
             insertMany(payload);
         } catch (Exception e){
             e.printStackTrace();
         }
-    }
-
-    public List<Entry> lastTenEntries() {
-        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
     }
 }

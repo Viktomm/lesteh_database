@@ -1,10 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Debug page</title>
 </head>
 <body>
-Debug body
+<table border="1">
+    <thead>
+    <tr>
+        <th>Дата</th>
+        <th>Название прибора</th>
+        <th>Серийный номер</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="entry : ${entries}">
+        <td th:text="${entry.date}"/>
+        <td th:text="${entry.UName}"/>
+        <td th:text="${entry.serial}"/>
+        <td th:each="e : ${entry.data}">
+            <div th:text="${e.getKey()}"></div>
+            <div th:text="${e.getValue()}"></div>
+        </tr>
+    </tr>
+    </tbody>
+</table>
 </body>
 </html>

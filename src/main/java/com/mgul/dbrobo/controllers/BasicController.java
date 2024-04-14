@@ -27,9 +27,9 @@ public class BasicController {
     }
 
     @GetMapping("/debug")
-    @ResponseBody
-    public ResponseEntity getDebugPage(){
-        return ResponseEntity.ok(entryService.lastTenEntries());
+    public String getDebugPage(Model model){
+        model.addAttribute("entries", entryService.lastTenEntries());
+        return "debug";
     }
 
     @GetMapping("/mainexport")
