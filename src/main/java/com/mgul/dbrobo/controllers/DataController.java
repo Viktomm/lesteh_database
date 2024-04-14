@@ -3,8 +3,10 @@ package com.mgul.dbrobo.controllers;
 import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Entry;
+import com.mgul.dbrobo.models.IntervalDataDTO;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +16,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.MultiValueMap;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.BindingResultUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
@@ -55,20 +59,29 @@ public class DataController {
     }
 
     @GetMapping( "/deb.php")
-    public String getDataBetween(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                     LocalDateTime fdate,
-                                 @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                 LocalDateTime sdate,
-                                 @RequestParam("jsonOrCsv") Boolean jsonOrCsv,
-                                       Model model) {
+    public String getDataBetween(@ModelAttribute("intervalData") @Valid IntervalDataDTO intervalDataDTO,
+                                 BindingResult bindingResult,
+                                 Model model) {
+        if (intervalDataDTO.getFdate() == null) {
+            bindingResult.rejectValue("fdate", "error.fdate", "Дата не может быть пустой");
+        }
+        if (intervalDataDTO.getSdate() == null) {
+            bindingResult.rejectValue("sdate", "error.sdate", "Дата не может быть пустой");
+        }
+        if (intervalDataDTO.getJsonOrCsv() == null) {
+            bindingResult.rejectValue("jsonOrCsv", "error.jsonOrCsv", "Необходимо выбрать вариант выдачи данных");
+        }
+        if (bindingResult.hasErrors()) {
+            return "mainexport";
+        }
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        model.addAttribute("fdate", dtf.format(fdate));
-        model.addAttribute("sdate", dtf.format(sdate));
-        if (jsonOrCsv) {
+        model.addAttribute("fdate", dtf.format(intervalDataDTO.getFdate()));
+        model.addAttribute("sdate", dtf.format(intervalDataDTO.getSdate()));
+        if (intervalDataDTO.getJsonOrCsv()) {
             return "apifilebackJSON";
         } else {
-            model.addAttribute("fdate", fdate);
-            model.addAttribute("sdate", sdate);
+            model.addAttribute("fdate", intervalDataDTO.getFdate());
+            model.addAttribute("sdate", intervalDataDTO.getSdate());
             model.addAttribute("devices", deviceService.findAll());
             return "apifilebackCSV";
         }

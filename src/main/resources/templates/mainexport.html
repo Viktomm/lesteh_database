@@ -6,23 +6,29 @@
 </head>
 <body>
 
-<form th:action="@{/mongo/core/deb.php}" th:method="get">
+<form th:object="${intervalData}" th:action="@{/mongo/core/deb.php}" th:method="get">
     <div>
         <label for="date from">Выберите начало временного интервала</label>
-        <input type="datetime-local" th:name="fdate" id="date from"/>
+        <input type="datetime-local" th:field="*{fdate}" id="date from"/>
+        <br>
+        <a style="color:red" th:if="${#fields.hasErrors('fdate')}" th:errors="*{fdate}">не видно</a>
     </div>
     <br>
     <div>
         <label for="date to">Выберите конец временного интервала</label>
-        <input type="datetime-local" th:name="sdate" id="date to"/>
+        <input type="datetime-local" th:field="*{sdate}" id="date to"/>
+        <br>
+        <a style="color:red" th:if="${#fields.hasErrors('sdate')}" th:errors="*{sdate}">не видно</a>
     </div>
     <br>
     <div>
-        <input type="radio" name="group" id="jsonR" value="1" th:name="jsonOrCsv">
+        <input type="radio" name="group" id="jsonR" value="1" th:field="*{jsonOrCsv}">
         <label for="jsonR" th:text="JSON"></label>
         <br>
-        <input type="radio" name="group" id="csvR" value="0" th:name="jsonOrCsv">
+        <input type="radio" name="group" id="csvR" value="0" th:field="*{jsonOrCsv}">
         <label for="csvR" th:text="CSV"></label>
+        <br>
+        <a style="color:red" th:if="${#fields.hasErrors('jsonOrCsv')}" th:errors="*{jsonOrCsv}">не видно</a>
     </div>
     <br>
     <div>

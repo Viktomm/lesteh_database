@@ -1,15 +1,13 @@
 package com.mgul.dbrobo.controllers;
 
+import com.mgul.dbrobo.models.IntervalDataDTO;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.ws.server.endpoint.annotation.RequestPayload;
 
 @Controller
@@ -31,11 +29,11 @@ public class BasicController {
     @GetMapping("/debug")
     @ResponseBody
     public ResponseEntity getDebugPage(){
-        return ResponseEntity.ok(entryService.firstTenEntries());
+        return ResponseEntity.ok(entryService.lastTenEntries());
     }
 
     @GetMapping("/mainexport")
-    public String getExportPage(Model model){
+    public String getExportPage(@ModelAttribute("intervalData") IntervalDataDTO intervalDataDTO){
         return "mainexport";
     }
 

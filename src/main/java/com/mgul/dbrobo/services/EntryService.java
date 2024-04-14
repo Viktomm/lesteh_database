@@ -36,6 +36,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 
 @Service
@@ -119,10 +120,12 @@ public class EntryService {
 
         if (result.stream().findAny().isEmpty()) throw new EntryNotFoundException(fdate, sdate,
                 deviceId, deviceRepository.findAll(),
-                "Записей по прибору " + device.getName() + " (" + device.getSerial() + ") не найдено");
+                "Записей по прибору " + device.getName() + " (" + device.getSerial() + ") в период с "
+                        + fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+                        + " до " + sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) + " не найдено");
         // FIXME: 15.05.2023 Сделать баля по-человечески баля
         // FIXME: 31.12.2023 Ничего баля не поменялось баля
-
+        // FIXME: 14.04.2024 А в принципе хорошо баля
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
 
@@ -179,7 +182,7 @@ public class EntryService {
     public Map<String,Entry> getDataBetween(LocalDateTime fdate, LocalDateTime sdate) {
         List<Entry> fromDb = entryRepository.findByDateForCalculationBetween(fdate,sdate);
         LinkedHashMap<String,Entry> result = new LinkedHashMap<>();
-        for(Entry entry:fromDb) {
+        for(Entry entry : fromDb) {
             try {
                 Method getId = entry.getClass().getDeclaredMethod("getIdNotForSpring");
                 getId.setAccessible(true);
@@ -204,4 +207,7 @@ public class EntryService {
         }
     }
 
+    public List<Entry> lastTenEntries() {
+        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"createdAt"))).toList();
+    }
 }
