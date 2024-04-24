@@ -35,6 +35,7 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
@@ -84,12 +85,12 @@ public class EntryService {
                     entry.setDateForCalculation(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]));
                     entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]))));
                 } catch (Exception e) {
-                    entry.setDateForCalculation(LocalDateTime.now());
-                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now())));
+                    entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Europe/Moscow")))));
                 }
             } else {
-                entry.setDateForCalculation(LocalDateTime.now());
-                entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now())));
+                entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Europe/Moscow")))));
             }
             entry.setUName(deviceName);
             entry.setSerial(deviceSerial);
@@ -109,7 +110,7 @@ public class EntryService {
     }
 
     public List<Entry> lastTenEntries() {
-        return entryRepository.findAll(PageRequest.of(0,10,Sort.by(Sort.Direction.DESC,"dateForCalculation"))).toList();
+        return entryRepository.findAll(PageRequest.of(0,10, Sort.by(Sort.Direction.DESC,"dateForCalculation"))).toList();
     }
 
     public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
