@@ -109,8 +109,10 @@ public class EntryService {
         entryRepository.insert(entries);
     }
 
-    public List<Entry> lastTenEntries() {
-        return entryRepository.findAll(PageRequest.of(0,10, Sort.by(Sort.Direction.DESC,"dateForCalculation"))).toList();
+
+    public List<Entry> lastTenEntries(String uName, String serial, Boolean whichDate) {
+        String date = whichDate ? "Date" : "dateForCalculation";
+        return entryRepository.findAllByuNameContainingAndSerialContaining(uName, serial, PageRequest.of(0,10,Sort.by(Sort.Direction.DESC, date))).toList();
     }
 
     public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {

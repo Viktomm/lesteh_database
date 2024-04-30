@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.controllers;
 
+import com.mgul.dbrobo.models.DebugFilters;
 import com.mgul.dbrobo.models.IntervalDataDTO;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
@@ -27,8 +28,9 @@ public class BasicController {
     }
 
     @GetMapping("/debug")
-    public String getDebugPage(Model model){
-        model.addAttribute("entries", entryService.lastTenEntries());
+    public String getDebugPage(@ModelAttribute("debugFilters") DebugFilters debugFilters,
+                               Model model) {
+        model.addAttribute("entries", entryService.lastTenEntries(debugFilters.getUName().strip(), debugFilters.getSerial().strip(), debugFilters.getWhichDate()));
         return "debug";
     }
 

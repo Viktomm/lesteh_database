@@ -5,6 +5,23 @@
     <title>Debug page</title>
 </head>
 <body>
+<form th:object="${debugFilters}" th:method="GET" th:action="@{/mongo/debug}">
+    <label for="name">По названию:</label>
+    <input id="name" th:field="*{UName}">
+    <label for="serial">По серийному номеру:</label>
+    <input id="serial" th:field="*{serial}">
+    <br>
+    <div>
+        <label>Выбрать по дате:</label>
+        <input type="radio" name="group" id="Date" value="1" th:field="*{whichDate}">
+        <label for="Date">Прихода данных на сервер</label>
+        <input type="radio" name="group" id="dateForCalculation" value="0" th:field="*{whichDate}">
+        <label for="dateForCalculation">Непосредственного считывания данных</label>
+        <br>
+    </div>
+    <input type="submit" value="Поиск">
+</form>
+<br>
 <table border="1">
     <thead>
     <tr>

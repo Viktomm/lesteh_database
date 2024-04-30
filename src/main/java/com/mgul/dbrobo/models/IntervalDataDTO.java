@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -17,7 +18,7 @@ public class IntervalDataDTO {
     private LocalDateTime fdate;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime sdate;
+    private LocalDateTime sdate = LocalDateTime.now(ZoneId);
 
-    private Boolean jsonOrCsv;
+    private Boolean jsonOrCsv = true;
 }
