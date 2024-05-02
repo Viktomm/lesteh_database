@@ -7,8 +7,6 @@
         function highlightTableRows(tableId, hoverClass, clickClass, multiple)
         {
             var table = document.getElementById(tableId);
-            console.log(table)
-
             if (typeof multiple == 'undefined') multiple = true;
 
             if (hoverClass)
@@ -164,13 +162,15 @@
 
         let data = entry.data // взяли отдельно поле data, которое представляет собой литерал объект ключ-значение
 
-        for (let i = 0, j = 0; i < Object.keys(headers).length; i++) {
+        for (let i = 0; i < Object.keys(headers).length; i++) {
             let td = document.createElement('td')
             let keys = Object.keys(data) // массив ключей в литерал объекте
             let values = Object.values(data) // массив значений в литерал объекте
-            if (headers[i].toString() === keys[j]) {
-                td.textContent = values[j]
-                j++;
+            for (let j = 0; j < keys.length; j++) {
+                if (headers[i].toString() === keys[j]) {
+                    td.textContent = values[j]
+                    break;
+                }
             }
             tr.appendChild(td)
         }
@@ -180,7 +180,6 @@
 <script type="text/javascript">
     //Подсветка по клику и при наведении мышки на ряд, множественный выбор по клику разрешен
     highlightTableRows("myTable","hoverRow","clickedRow");
-    highlightTableRows("myTable1","hoverRow","clickedRow");
 </script>
 </body>
 </html>
