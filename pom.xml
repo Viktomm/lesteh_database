@@ -70,6 +70,14 @@
             <artifactId>jackson-dataformat-csv</artifactId>
             <version>2.13.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <scope>runtime</scope>
+            <optional>true</optional>
+            <!-- Settings - Build, Execution, Deployment - Compiler - Build project automatically в true -->
+            <!-- Перебилдить по-умолчанию - Ctrl + F9 -->
+        </dependency>
     </dependencies>
 
     <build>
