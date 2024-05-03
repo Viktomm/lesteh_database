@@ -18,5 +18,5 @@ public interface EntryRepository extends MongoRepository<Entry,String> {
     Entry findFirstByuNameAndSerial(String uName,String serial);
     List<Entry> findByuNameAndSerialAndDateForCalculationBetween(String uName, String serial, LocalDateTime start, LocalDateTime end);
 
-    Page<Entry> findAllByuNameContainingAndSerialContaining(String uName, String serial, Pageable pageable);
+    Page<Entry> findAllByuNameContainingIgnoreCaseAndSerialContainingIgnoreCase(String uName, String serial, Pageable pageable);
 }

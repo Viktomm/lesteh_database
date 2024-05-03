@@ -112,7 +112,7 @@ public class EntryService {
 
     public List<Entry> lastTenEntries(String uName, String serial, Boolean whichDate) {
         String date = whichDate ? "Date" : "dateForCalculation";
-        return entryRepository.findAllByuNameContainingAndSerialContaining(uName, serial, PageRequest.of(0,10,Sort.by(Sort.Direction.DESC, date))).toList();
+        return entryRepository.findAllByuNameContainingIgnoreCaseAndSerialContainingIgnoreCase(uName, serial, PageRequest.of(0,10,Sort.by(Sort.Direction.DESC, date))).toList();
     }
 
     public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
