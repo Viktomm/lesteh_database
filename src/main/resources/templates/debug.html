@@ -166,12 +166,20 @@
             let td = document.createElement('td')
             let keys = Object.keys(data) // массив ключей в литерал объекте
             let values = Object.values(data) // массив значений в литерал объекте
-            for (let j = 0; j < keys.length; j++) {
-                if (headers[i].toString() === keys[j]) {
-                    td.textContent = values[j]
-                    break;
-                }
+            let index = keys.indexOf(headers[i])
+            if (index !== -1) {
+                td.textContent = values[index]
             }
+            // for (let j = 0; j < keys.length; j++) {
+            //     var index = headers.findIndex(keys[i])
+            //     if (index !== -1) {
+            //         td.textContent = values[index]
+            //     }
+                // if (headers[i].toString() === keys[j]) {
+                //     td.textContent = values[j]
+                //     break;
+                // }
+            // }
             tr.appendChild(td)
         }
     }
