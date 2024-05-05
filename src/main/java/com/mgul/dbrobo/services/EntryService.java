@@ -1,6 +1,7 @@
 package com.mgul.dbrobo.services;
 
 
+import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -55,22 +56,26 @@ public class EntryService {
         return entryRepository.findAll();
     }
 
-    public void insertOne(LinkedHashMap<String, LinkedHashMap<String,String>> entryData){
+    public void insertOne(LinkedHashMap<String, LinkedHashMap<String,JsonNode>> entryData){
         entryRepository.insert(transformation(entryData));
     }
 
-    private Entry transformation(LinkedHashMap<String, LinkedHashMap<String, String>> entryData) {
+    public void appendValueToField(JsonNode node, String field) {
+
+    }
+
+    private Entry transformation(LinkedHashMap<String, LinkedHashMap<String, JsonNode>> entryData) {
         Entry entry = new Entry();
         LinkedHashMap<String,String> newEntryData = new LinkedHashMap<>();
-        Optional<Device> device = deviceRepository.findByAkey(entryData.get("system").get("Akey"));
+        Optional<Device> device = deviceRepository.findByAkey(entryData.get("system").get("Akey").asText());
         if (device.isPresent()) {
             entryData.get("system").remove("Akey");
             String deviceName = device.get().getName();
             String deviceSerial = device.get().getSerial();
-            for(String key: entryData.keySet()){
-                LinkedHashMap<String,String> value = entryData.get(key);
-                for(String innerKey: value.keySet()) {
-                    newEntryData.put(key + "_" + innerKey, value.get(innerKey));
+            for (String key : entryData.keySet()) {
+                LinkedHashMap<String,JsonNode> value = entryData.get(key);
+                for (String innerKey : value.keySet()) {
+                    newEntryData.put(key + "_" + innerKey, value.get(innerKey).asText());
                 }
             }
             DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -101,9 +106,9 @@ public class EntryService {
             throw new WrongAKeyException("There's no device with such aKey");
     }
 
-    public void insertMany(List<LinkedHashMap<String, LinkedHashMap<String, String>>> allData){
+    public void insertMany(List<LinkedHashMap<String, LinkedHashMap<String, JsonNode>>> allData){
         List<Entry> entries = new ArrayList<>();
-        for(LinkedHashMap<String, LinkedHashMap<String, String>> singleData:allData) {
+        for(LinkedHashMap<String, LinkedHashMap<String, JsonNode>> singleData:allData) {
             entries.add(transformation(singleData));
         }
         entryRepository.insert(entries);
@@ -203,9 +208,9 @@ public class EntryService {
         try{
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream in = file.getInputStream();
-            ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>> payload;
+            ArrayList<LinkedHashMap<String, LinkedHashMap<String, JsonNode>>> payload;
             List<LinkedHashMap<String, LinkedHashMap<String, String>>> test = new ArrayList<>();
-            payload = objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, String>>>>(){});
+            payload = objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, JsonNode>>>>(){});
             insertMany(payload);
         } catch (Exception e){
             e.printStackTrace();

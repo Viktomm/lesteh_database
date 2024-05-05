@@ -161,17 +161,22 @@
         tr.appendChild(td)
 
         let data = entry.data // взяли отдельно поле data, которое представляет собой литерал объект ключ-значение
+        let map = new Map(Object.entries(data))
+
 
         for (let i = 0; i < Object.keys(headers).length; i++) {
             let td = document.createElement('td')
-            if (data.hasOwnProperty(headers[i].toString())) {
-                let keys = Object.keys(data) // массив ключей в литерал объекте
-                let values = Object.values(data) // массив значений в литерал объекте
-                let index = keys.indexOf(headers[i].toString())
+            if (map.has(headers[i].toString())) {
+                td.textContent = map.get(headers[i].toString())
+            // if (data.hasOwnProperty(headers[i].toString())) {
+                // let keys = Object.keys(data) // массив ключей в литерал объекте
+                // let values = Object.values(data) // массив значений в литерал объекте
 
-                if (index !== -1) {
-                    td.textContent = values[index]
-                }
+                // let index = keys.indexOf(headers[i].toString())
+                //
+                // if (index !== -1) {
+                //     td.textContent = values[index]
+                // }
                 // for (let j = 0; j < keys.length; j++) {
                 //     var index = headers.findIndex(keys[i])
                 //     if (index !== -1) {

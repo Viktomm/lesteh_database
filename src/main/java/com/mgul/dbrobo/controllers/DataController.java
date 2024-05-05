@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Entry;
@@ -49,7 +50,7 @@ public class DataController {
 
 
     @PostMapping("/jsonapp.php")
-    public ResponseEntity insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, String>> allData) {
+    public ResponseEntity insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, JsonNode>> allData) {
         try {
             entryService.insertOne(allData);
             return ResponseEntity.status(HttpStatus.CREATED).build();
