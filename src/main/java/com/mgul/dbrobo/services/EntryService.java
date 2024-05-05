@@ -37,6 +37,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
@@ -60,8 +61,16 @@ public class EntryService {
         entryRepository.insert(transformation(entryData));
     }
 
-    public void appendValueToField(JsonNode node, String field) {
-
+    private void appendValueToField(JsonNode node, String fieldName, LinkedHashMap<String,String> data) {
+        if (node.isValueNode()) {
+            data.put(fieldName, node.asText());
+        } else {
+            Iterator<Map.Entry<String, JsonNode>> iterator = node.fields();
+            while (iterator.hasNext()) {
+                Map.Entry<String, JsonNode> subNode = iterator.next();
+                appendValueToField(subNode.getValue(), fieldName + "_" + subNode.getKey(), data);
+            }
+        }
     }
 
     private Entry transformation(LinkedHashMap<String, LinkedHashMap<String, JsonNode>> entryData) {
@@ -73,29 +82,27 @@ public class EntryService {
             String deviceName = device.get().getName();
             String deviceSerial = device.get().getSerial();
             for (String key : entryData.keySet()) {
-                LinkedHashMap<String,JsonNode> value = entryData.get(key);
+                LinkedHashMap<String, JsonNode> value = entryData.get(key);
                 for (String innerKey : value.keySet()) {
-                    newEntryData.put(key + "_" + innerKey, value.get(innerKey).asText());
+                    appendValueToField(value.get(innerKey), key + "_" + innerKey, newEntryData);
                 }
             }
-            DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             //TODO:боже пофиксите кто-нибудь эту дату, я не  умею((
+            // твоя душа очищена, пользуйтесь DateTimeFormatter'ом всегда
             if (entryData.containsKey("RTC")) {
                 try {
-                    String[] stringOfDates = (entryData.get("RTC").get("date") + ":" + entryData.get("RTC").get("time")).split("[:-]");
-                    Integer[] dates = new Integer[6];
-                    for (int i = 0; i < 6; i++) {
-                        dates[i]=Integer.valueOf(stringOfDates[i]);
-                    }
-                    entry.setDateForCalculation(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]));
-                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.of(dates[0],dates[1],dates[2],dates[3],dates[4],dates[5]))));
+                    String dateTimeString = entryData.get("RTC").get("date").asText() + " " + entryData.get("RTC").get("time").asText();
+                    entry.setDate(dateTimeString);
+                    LocalDateTime localDateTime = LocalDateTime.parse(dateTimeString, pattern);
+                    entry.setDateForCalculation(localDateTime);
                 } catch (Exception e) {
+                    entry.setDate(LocalDateTime.now(ZoneId.of("Europe/Moscow")).format(pattern));
                     entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                    entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Europe/Moscow")))));
                 }
             } else {
+                entry.setDate(LocalDateTime.now(ZoneId.of("Europe/Moscow")).format(pattern));
                 entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
-                entry.setDate(format.format(Timestamp.valueOf(LocalDateTime.now(ZoneId.of("Europe/Moscow")))));
             }
             entry.setUName(deviceName);
             entry.setSerial(deviceSerial);
