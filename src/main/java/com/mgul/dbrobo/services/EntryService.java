@@ -1,23 +1,21 @@
 package com.mgul.dbrobo.services;
 
 
-import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
 import com.mgul.dbrobo.models.Device;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.repositories.DeviceRepository;
 import com.mgul.dbrobo.repositories.EntryRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,20 +24,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 
-import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
 import java.util.*;
 
 @Service
@@ -145,6 +135,7 @@ public class EntryService {
         // FIXME: 14.04.2024 А в принципе хорошо баля
         CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder().setColumnSeparator(';').setLineSeparator('\n');
         ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
 
         Entry entryFirst = result.stream().findAny().get();
         JsonNode jsonTree = mapper.valueToTree(entryFirst);

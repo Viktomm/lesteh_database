@@ -15,10 +15,10 @@ import java.time.ZoneId;
 @Data
 public class IntervalDataDTO {
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime fdate = LocalDateTime.now(ZoneId.of("Europe/Moscow")).minusHours(1);
+    private LocalDateTime fdate = LocalDateTime.now(ZoneId.of("Europe/Moscow")).withSecond(0).minusHours(1);
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime sdate = LocalDateTime.now(ZoneId.of("Europe/Moscow"));
+    private LocalDateTime sdate = LocalDateTime.now(ZoneId.of("Europe/Moscow")).withSecond(0);
 
     private Boolean jsonOrCsv = true;
 }

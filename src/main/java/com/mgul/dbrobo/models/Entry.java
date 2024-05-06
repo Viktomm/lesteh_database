@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,9 +22,11 @@ public class Entry {
     @Id
     private String id;
     @Field("Date")
+    @JsonProperty("Date")
     private String date;
     private LocalDateTime dateForCalculation;
     @Field("uName")
+    @JsonProperty("uName")
     private String uName;
     private String serial;
     private LinkedHashMap<String,String> data;

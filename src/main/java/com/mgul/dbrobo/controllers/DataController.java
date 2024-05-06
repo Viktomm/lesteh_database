@@ -59,7 +59,7 @@ public class DataController {
         }
     }
 
-    @GetMapping( "/deb.php")
+    @GetMapping( value = "/deb.php", params = {"jsonOrCsv"})
     public String getDataBetween(@ModelAttribute("intervalData") @Valid IntervalDataDTO intervalDataDTO,
                                  BindingResult bindingResult,
                                  Model model) {
@@ -89,27 +89,31 @@ public class DataController {
     }
 
     /**
-     * Обработка запроса на выдачу в JSON формате
+     * Обработка запроса на выдачу в JSON формате.
+     * Может использоваться параметр fileback, но он ни на что не влияет -
+     * переполз как элемент API из старого dbrobo, а так в любом случае
+     * возвращается сырой JSON.
      */
-    @GetMapping(value = "/deb.php", params = {"fileback"})
+    @GetMapping(value = "/deb.php")
     @ResponseBody
     public Map<String, Entry> loadDataBetweenTextJSON
             (@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
-        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
+        return entryService.getDataBetween(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
+                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime());
     }
 
     /**
      * Обработка запроса на выдачу в CSV формате
      */
     @GetMapping(value = "/deb.php", params = {"manualmode"})
-    public ResponseEntity loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    public ResponseEntity<String> loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime sdate,
                                              @RequestParam("deviceId") Long deviceId) {
-        String str = entryService.getDataBetweenCSV(fdate, sdate, deviceId);
+        String str = entryService.getDataBetweenCSV(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
+                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(), deviceId);
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
                 .contentLength(str.length())

@@ -5,7 +5,7 @@
     <title>Title</title>
 </head>
 <body>
-<form th:object="${time}" th:action="@{/mongo/core/deb.php}" th:method="get">
+<form th:action="@{/mongo/core/deb.php}" th:method="get">
     <input type="hidden" name="fdate" th:value="${fdate}">
     <input type="hidden" name="sdate" th:value="${sdate}">
     <input type="hidden" name="manualmode" th:value="1">
