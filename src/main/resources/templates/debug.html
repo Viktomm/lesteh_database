@@ -77,7 +77,9 @@
     </style>
 </head>
 <body>
-<button onclick="location.href='mongo'" type="button">Назад</button>
+<a href="/mongo">
+    <input type="submit" value="Назад">
+</a>
 <form th:object="${debugFilters}" th:method="GET" th:action="@{/mongo/debug}">
     <label for="name">По названию:</label>
     <input id="name" th:field="*{UName}">
@@ -129,11 +131,11 @@
         let tr = document.createElement('tr')
         tbody.appendChild(tr)
         let td = document.createElement('td')
-        td.textContent = entry.date
+        td.textContent = entry.Date
         tr.appendChild(td)
 
         td = document.createElement('td')
-        td.textContent = entry.uname
+        td.textContent = entry.uName
         tr.appendChild(td)
 
         td = document.createElement('td')
