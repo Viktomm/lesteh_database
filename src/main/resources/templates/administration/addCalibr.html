@@ -23,7 +23,8 @@
     <br>
     <label>Введите коэффициенты</label> <br>
     <div id="container">
-        <input type="text" name="ai[0]"> <br>
+        <label for="temp_in">a0</label>
+        <input id="temp_in" type="text" name="ai[0]"> <br>
     </div>
 <!--    <input type="text" th:field="*{ai[0]}"> <br>-->
 <!--    <input type="text" th:field="*{ai[1]}"> <br>-->
@@ -47,7 +48,13 @@
                 let input = document.createElement("input")
                 input.type = "text";
                 input.name = `ai[${i}]`;
+
+                let label = document.createElement("label")
+                label.textContent = `a${i} `
+
+                container.appendChild(label)
                 container.appendChild(input)
+
                 container.appendChild(document.createElement("br"))
             }
 
