@@ -37,16 +37,24 @@
   <input type="submit" value="Назад">
 </a>
 <form th:method="POST" action="/mongo/admin/devices" th:object="${newDev}">
+  <br>
   <label>
-    Добавить новый прибор <br>
+    Добавить новый прибор <br> <br>
   </label>
-  <input type="text" placeholder="Введите наименование " th:field="*{name}"> <br>
-  <input type="text" placeholder="Введите серийный номер " th:field="*{serial}"> <br>
-  <input type="text" placeholder="Введите ключ доступа " th:field="*{akey}"> <br>
-  <input type="text" placeholder="Введите координату Х " th:field="*{x}"> <br>
-  <input type="text" placeholder="Введите координату У " th:field="*{y}"> <br>
+  <label for="name">Наименование </label>
+  <input id="name" type="text" placeholder="Введите наименование " th:field="*{name}"> <br>
+  <label for="serial">Серийный номер </label>
+  <input id="serial" type="text" placeholder="Введите серийный номер " th:field="*{serial}"> <br>
+  <label for="akey">Ключ доступа </label>
+  <input id="akey" type="text" placeholder="Введите ключ доступа " th:field="*{akey}"> <br>
+  <label for="x">Координата X </label>
+  <input id="x" type="text" placeholder="Введите координату Х " th:field="*{x}"> <br>
+  <label for="y">Координата Y </label>
+  <input id="y" type="text" placeholder="Введите координату У " th:field="*{y}"> <br>
+  <label for="object1">Объект размещения </label>
   <input placeholder="Выберите объект размещения" list="" name="object" id="object1" autocomplete="off"> <br>
   <datalist id="objects"></datalist>
+  <br>
   <input type="submit" value="Добавить">
 </form>
 </body>
