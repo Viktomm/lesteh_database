@@ -22,13 +22,16 @@ public class DeviceService {
     private final PlaceRepository placeRepository;
 
     private final EntryRepository entryRepository;
+
+    private final CalibrationService calibrationService;
     private final int pageSize = 10;
 
     @Autowired
-    public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository) {
+    public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository, CalibrationService calibrationService) {
         this.deviceRepository = deviceRepository;
         this.placeRepository = placeRepository;
         this.entryRepository = entryRepository;
+        this.calibrationService = calibrationService;
     }
 
     public List<Device> findAll() { return deviceRepository.findAll();}
@@ -80,6 +83,9 @@ public class DeviceService {
     public List<String> getSensorsList(Long id) {
         Device device = deviceRepository.findById(id).get();
         Entry entry = entryRepository.findFirstByuNameAndSerial(device.getName(), device.getSerial());
+        if (entry == null) {
+            return calibrationService.findSensorsByUnameAndSerial(device.getName(),device.getSerial()); // Если у нас нет даты от прибора, то ищем по уже внесённым калибровочным данным
+        }
         Set<String> sensors = new TreeSet<>(entry.getData().keySet());
         sensors.removeIf(x-> x.startsWith("system"));
         sensors.removeIf(x-> x.startsWith("RTC"));

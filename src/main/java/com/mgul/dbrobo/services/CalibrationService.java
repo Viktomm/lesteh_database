@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CalibrationService {
@@ -73,6 +75,13 @@ public class CalibrationService {
             calibration.setSensors(sensors);
         }
         calibrationRepository.save(calibration);
+    }
+
+    public List<String> findSensorsByUnameAndSerial(String uName, String serial) {
+        Optional<Calibration> cal = calibrationRepository.findByuNameAndSerial(uName, serial);
+        if (cal.isEmpty()) return new ArrayList<>();
+        Calibration calibration = cal.get();
+        return calibration.getSensorsNames();
     }
 
 }

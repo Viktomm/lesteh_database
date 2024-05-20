@@ -61,4 +61,8 @@ public class Calibration {
                 ", sensors=" + sensors +
                 '}';
     }
+
+    public List<String> getSensorsNames() {
+        return sensors.stream().map(Sensor::getSensor).toList();
+    }
 }
