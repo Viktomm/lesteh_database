@@ -140,7 +140,7 @@ public class EntryService {
         Entry entryFirst = result.stream().findAny().get();
         JsonNode jsonTree = mapper.valueToTree(entryFirst);
         JsonNode jsonNodeData = jsonTree.get("data");
-        csvSchemaBuilder.addColumn("date");
+        csvSchemaBuilder.addColumn("Date");
         jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
         CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
         CsvMapper csvMapper = new CsvMapper();
