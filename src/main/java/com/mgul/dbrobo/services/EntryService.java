@@ -51,7 +51,7 @@ public class EntryService {
         entryRepository.insert(transformation(entryData));
     }
 
-    private void appendValueToField(JsonNode node, String fieldName, LinkedHashMap<String,String> data) {
+    private void appendValueToField(JsonNode node, String fieldName, LinkedHashMap<String, String> data) {
         if (node.isValueNode()) {
             data.put(fieldName, node.asText());
         } else {

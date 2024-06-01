@@ -1,5 +1,6 @@
 package com.mgul.dbrobo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -11,6 +12,7 @@ import java.util.List;
 @Document(collection = "calibration")
 public class Calibration {
     @Id
+    @JsonIgnore
     private String id;
 
     private String uName;
@@ -62,6 +64,7 @@ public class Calibration {
                 '}';
     }
 
+    @JsonIgnore // Я в душе не ебу, но почему-то Jackson создает поле sensorsNames и кидает туда результат этого метода
     public List<String> getSensorsNames() {
         return sensors.stream().map(Sensor::getSensor).toList();
     }

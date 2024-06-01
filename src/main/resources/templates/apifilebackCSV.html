@@ -10,8 +10,8 @@
     <input type="hidden" name="sdate" th:value="${sdate}">
     <input type="hidden" name="manualmode" th:value="1">
     <label for="dropDownList">Выберите прибор:</label>
-    <select id="dropDownList" th:name="deviceId">
-        <option th:selected="${device.getId()}==${deviceId}"
+    <select id="dropDownList" th:name="unitid">
+        <option th:selected="${device.getId()}==${unitid}"
                 th:each="device : ${devices}"
                 th:value="${device.getId()}"
                 th:text="${device.getName()} + ' ' + '(' + ${device.getSerial()} + ')'"></option>

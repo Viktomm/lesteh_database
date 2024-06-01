@@ -3,27 +3,23 @@ package com.mgul.dbrobo.controllers;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
+import com.mgul.dbrobo.exceptions.WrongURLException;
+import com.mgul.dbrobo.models.Calibration;
 import com.mgul.dbrobo.models.Entry;
 import com.mgul.dbrobo.models.IntervalDataDTO;
+import com.mgul.dbrobo.services.CalibrationService;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.MultiValueMap;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.BindingResultUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -33,14 +29,14 @@ import java.util.*;
 @RequestMapping("/core")
 public class DataController {
     private final EntryService entryService;
-
     private final DeviceService deviceService;
-
+    private final CalibrationService calibrationService;
 
     @Autowired
-    public DataController(EntryService entryService, DeviceService deviceService) {
+    public DataController(EntryService entryService, DeviceService deviceService, CalibrationService calibrationService) {
         this.entryService = entryService;
         this.deviceService = deviceService;
+        this.calibrationService = calibrationService;
     }
 
     @GetMapping()
@@ -84,6 +80,7 @@ public class DataController {
             model.addAttribute("fdate", intervalDataDTO.getFdate());
             model.addAttribute("sdate", intervalDataDTO.getSdate());
             model.addAttribute("devices", deviceService.findAll());
+            model.addAttribute("unitid", 1);
             return "apifilebackCSV";
         }
     }
@@ -111,7 +108,7 @@ public class DataController {
                                                  LocalDateTime fdate,
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime sdate,
-                                             @RequestParam("deviceId") Long deviceId) {
+                                             @RequestParam("unitid") Long deviceId) {
         String str = entryService.getDataBetweenCSV(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
                 sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(), deviceId);
         return ResponseEntity.ok()
@@ -119,6 +116,17 @@ public class DataController {
                 .contentLength(str.length())
                 .header("Content-Type", "text/csv; charset=utf-8")
                 .body(str);
+    }
+
+    @GetMapping(value = "/deb.php", params = {"calibration"})
+    @ResponseBody
+    public List<Calibration> getCalibration(@RequestParam("calibration") String calibrationFlag,
+                                            @RequestParam(name = "id", required = false) Long deviceId) {
+        if (calibrationFlag.equals("full")) {
+            return calibrationService.findAll();
+        } else if (calibrationFlag.equals("filtid") && deviceId != null) {
+            return calibrationService.findByDeviceId(deviceId).map(List::of).orElse(Collections.emptyList());
+        } else throw new WrongURLException("запрос на адрес /core/deb.php имеет ошибку в параметрах calibration или id");
     }
 
     @ExceptionHandler
@@ -129,5 +137,17 @@ public class DataController {
         model.addAttribute("devices", e.getAllDevices());
         model.addAttribute("dataNotFound", e.getMessage());
         return "apifilebackCSV";
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    private String handleNoSuchDeviceId(NoSuchElementException e) {
+        return "Прибора с таким id не найдено";
+    }
+
+    @ExceptionHandler
+    @ResponseBody
+    private String handleWrongURL(WrongURLException e) {
+        return e.getMessage();
     }
 }
