@@ -7,6 +7,7 @@ import com.mgul.dbrobo.models.Admin;
 import com.mgul.dbrobo.repositories.AdminRepository;
 import com.mgul.dbrobo.utils.Roles;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,9 +18,12 @@ import java.util.Optional;
 public class AdminService {
     private final AdminRepository adminRepository;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Autowired
-    public AdminService(AdminRepository adminRepository) {
+    public AdminService(AdminRepository adminRepository, PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List<Admin> findAll() {
@@ -32,6 +36,7 @@ public class AdminService {
 
     @Transactional
     public void save(Admin admin) {
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         adminRepository.insert(admin);
     }
     @Transactional
@@ -51,7 +56,7 @@ public class AdminService {
     public void update(String id, Admin newAdminData) {
         Admin a = adminRepository.findById(id).get();
         if (newAdminData.getUsername()!=null) a.setUsername(newAdminData.getUsername());
-        if (!newAdminData.getPassword().isEmpty()) a.setPassword(newAdminData.getPassword());
+        if (!newAdminData.getPassword().isEmpty()) a.setPassword(passwordEncoder.encode(newAdminData.getPassword()));
         if (newAdminData.getFio()!=null) a.setFio(newAdminData.getFio());
         a.setRole(newAdminData.getRole());
         adminRepository.save(a);

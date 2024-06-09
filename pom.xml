@@ -78,6 +78,11 @@
             <!-- Settings - Build, Execution, Deployment - Compiler - Build project automatically в true -->
             <!-- Перебилдить по-умолчанию - Ctrl + F9 -->
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-crypto -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
