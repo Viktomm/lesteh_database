@@ -21,13 +21,11 @@
                 <td>
                     <a th:href="@{/mongo/admin/edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
                 </td>
-                <td>
-                    <th:block th:switch="${admin.getRole()}">
-                        <td th:case="ROLE_ADMIN" th:text="Администратор"></td>
-                        <td th:case="ROLE_MODERATOR" th:text="Модератор"></td>
-                        <td th:case="ROLE_HELPER" th:text="Оператор"></td>
-                    </th:block>
-                </td>
+                <div th:switch="${admin.getRole()}">
+                    <td th:case="ROLE_ADMIN" th:text="Администратор"></td>
+                    <td th:case="ROLE_MODERATOR" th:text="Модератор"></td>
+                    <td th:case="ROLE_HELPER" th:text="Оператор"></td>
+                </div>
                 <td th:text="${admin.getUsername()}">
 
                 </td>
