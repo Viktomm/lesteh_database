@@ -74,13 +74,12 @@
         .hoverRow { background-color: rgb(196, 248, 255); }
         .clickedRow { background-color: rgba(106, 234, 255, 0.99); }
     </style>
-    </style>
 </head>
 <body>
-<a href="/mongo">
+<a href="/">
     <input type="submit" value="Назад">
 </a>
-<form th:object="${debugFilters}" th:method="GET" th:action="@{/mongo/debug}">
+<form th:object="${debugFilters}" th:method="GET" th:action="@{/debug}">
     <label for="name">По названию:</label>
     <input id="name" th:field="*{UName}">
     <label for="serial">По серийному номеру:</label>
