@@ -10,7 +10,7 @@ import java.util.Collections;
 
 public class AdminDetails implements UserDetails {
 
-    private final Admin admin;
+    private Admin admin;
 
     public AdminDetails(Admin admin) {
         this.admin = admin;
@@ -18,8 +18,7 @@ public class AdminDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-//        return Collections.singletonList(new SimpleGrantedAuthority(admin.getRole()));
-        return null;
+        return Collections.singletonList(new SimpleGrantedAuthority(admin.getRole()));
     }
 
     @Override

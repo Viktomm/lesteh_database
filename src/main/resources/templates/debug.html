@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Debug page</title>
+    <script type="text/javascript">
+        function highlightTableRows(tableId, hoverClass, clickClass, multiple)
+        {
+            var table = document.getElementById(tableId);
+            if (typeof multiple == 'undefined') multiple = true;
+
+            if (hoverClass)
+            {
+                var hoverClassReg = new RegExp("\\b"+hoverClass+"\\b");
+
+                table.onmouseover = table.onmouseout = function(e)
+                {
+                    if (!e) e = window.event;
+                    var elem = e.target || e.srcElement;
+                    while (!elem.tagName || !elem.tagName.match(/td|th|table/i)) elem = elem.parentNode;
+
+                    if (elem.parentNode.tagName == 'TR' && elem.parentNode.parentNode.tagName == 'TBODY')
+                    {
+                        var row = elem.parentNode;
+                        if (!row.getAttribute('clickedRow')) row.className = e.type=="mouseover"?row.className+" "+hoverClass:row.className.replace(hoverClassReg," ");
+                    }
+                };
+            }
+
+
+            if (clickClass) table.onclick = function(e)
+            {
+                if (!e) e = window.event;
+                var elem = e.target || e.srcElement;
+                while (!elem.tagName || !elem.tagName.match(/td|th|table/i)) elem = elem.parentNode;
+
+                if (elem.parentNode.tagName == 'TR' && elem.parentNode.parentNode.tagName == 'TBODY')
+                {
+                    var clickClassReg = new RegExp("\\b"+clickClass+"\\b");
+                    var row = elem.parentNode;
+
+                    if (row.getAttribute('clickedRow'))
+                    {
+                        row.removeAttribute('clickedRow');
+                        row.className = row.className.replace(clickClassReg, "");
+                        row.className += " "+hoverClass;
+                    }
+                    else {
+                        if (hoverClass) row.className = row.className.replace(hoverClassReg, "");
+                        row.className += " "+clickClass;
+                        row.setAttribute('clickedRow', true);
+
+                        if (!multiple)
+                        {
+                            var lastRowI = table.getAttribute("lastClickedRowI");
+                            if (lastRowI!==null && lastRowI!=='' && row.sectionRowIndex!=lastRowI)
+                            {
+                                var lastRow = table.tBodies[0].rows[lastRowI];
+                                lastRow.className = lastRow.className.replace(clickClassReg, "");
+                                lastRow.removeAttribute('clickedRow');
+                            }
+                        }
+                        table.setAttribute("lastClickedRowI", row.sectionRowIndex);
+                    }
+                }
+            };
+        }
+    </script>
+    <style type="text/css">
+        /*table, td, th {border: 1px solid black; border-collapse: collapse;}*/
+        table th {background-color: #ffa4d2;}
+
+        /* Определяем стили для подсвечивания строк */
+        .hoverRow { background-color: rgb(196, 248, 255); }
+        .clickedRow { background-color: rgba(106, 234, 255, 0.99); }
+    </style>
+    </style>
+</head>
+<body>
+<a href="/mongo">
+    <input type="submit" value="Назад">
+</a>
+<form th:object="${debugFilters}" th:method="GET" th:action="@{/mongo/debug}">
+    <label for="name">По названию:</label>
+    <input id="name" th:field="*{UName}">
+    <label for="serial">По серийному номеру:</label>
+    <input id="serial" th:field="*{serial}">
+    <br>
+    <div>
+        <label>Выбрать по дате:</label>
+        <input type="radio" name="group" id="Date" value="1" th:field="*{whichDate}">
+        <label for="Date">Прихода данных на сервер</label>
+        <input type="radio" name="group" id="dateForCalculation" value="0" th:field="*{whichDate}">
+        <label for="dateForCalculation">Непосредственного считывания данных</label>
+        <br>
+    </div>
+    <input type="submit" value="Поиск">
+</form>
+<br>
+<script th:inline="javascript">
+    const table = document.createElement('table')
+    table.border = 1
+    table.id = 'myTable'
+    document.body.appendChild(table);
+
+    let headers = [[${headers}]];
+    let entries = [[${entries}]];
+
+    let thead = document.createElement('thead')
+    table.appendChild(thead)
+    let tr = document.createElement('tr');
+    thead.appendChild(tr)
+    let th = document.createElement('th')
+    th.textContent = 'Дата'
+    tr.appendChild(th)
+    th = document.createElement('th')
+    th.textContent = 'Название прибора'
+    tr.appendChild(th)
+    th = document.createElement('th')
+    th.textContent = 'Серийный номер'
+    tr.appendChild(th)
+    for (let head of headers) {
+        th = document.createElement('th')
+        th.textContent = head.toString()
+        tr.appendChild(th)
+    }
+
+    let tbody = document.createElement('tbody')
+    table.appendChild(tbody)
+    for (let entry of entries) {
+        let tr = document.createElement('tr')
+        tbody.appendChild(tr)
+        let td = document.createElement('td')
+        td.textContent = entry.Date
+        tr.appendChild(td)
+
+        td = document.createElement('td')
+        td.textContent = entry.uName
+        tr.appendChild(td)
+
+        td = document.createElement('td')
+        td.textContent = entry.serial
+        tr.appendChild(td)
+
+        let data = entry.data // взяли отдельно поле data, которое представляет собой литерал объект ключ-значение
+        let map = new Map(Object.entries(data))
+
+        for (let i = 0; i < Object.keys(headers).length; i++) {
+            let td = document.createElement('td')
+            if (map.has(headers[i].toString())) {
+                td.textContent = map.get(headers[i].toString())
+            }
+
+            tr.appendChild(td)
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    //Подсветка по клику и при наведении мышки на ряд, множественный выбор по клику разрешен
+    highlightTableRows("myTable","hoverRow","clickedRow");
+</script>
+</body>
+</html>

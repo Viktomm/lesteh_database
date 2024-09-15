@@ -1,72 +1,153 @@
 package com.mgul.dbrobo.controllers;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mgul.dbrobo.exceptions.EntryNotFoundException;
 import com.mgul.dbrobo.exceptions.WrongAKeyException;
-import com.mgul.dbrobo.models.Device;
+import com.mgul.dbrobo.exceptions.WrongURLException;
+import com.mgul.dbrobo.models.Calibration;
 import com.mgul.dbrobo.models.Entry;
+import com.mgul.dbrobo.models.IntervalDataDTO;
+import com.mgul.dbrobo.services.CalibrationService;
 import com.mgul.dbrobo.services.DeviceService;
 import com.mgul.dbrobo.services.EntryService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-@RestController
+@Controller
 @RequestMapping("/core")
 public class DataController {
     private final EntryService entryService;
-
     private final DeviceService deviceService;
-
+    private final CalibrationService calibrationService;
 
     @Autowired
-    public DataController(EntryService entryService, DeviceService deviceService) {
+    public DataController(EntryService entryService, DeviceService deviceService, CalibrationService calibrationService) {
         this.entryService = entryService;
         this.deviceService = deviceService;
+        this.calibrationService = calibrationService;
     }
 
     @GetMapping()
-    public List<Entry> findAll() {
-        return entryService.findAll();
+    public ResponseEntity findAll() {
+        return ResponseEntity.ok(entryService.findAll());
     }
 
 
     @PostMapping("/jsonapp.php")
-    public void insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, String>> allData) {
-        entryService.insertOne(allData);
+    public ResponseEntity insertOne(@RequestBody LinkedHashMap<String, LinkedHashMap<String, JsonNode>> allData) {
+        try {
+            entryService.insertOne(allData);
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        } catch (WrongAKeyException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @GetMapping( value = "/deb.php", params = {"jsonOrCsv"})
+    public String getDataBetween(@ModelAttribute("intervalData") @Valid IntervalDataDTO intervalDataDTO,
+                                 BindingResult bindingResult,
+                                 Model model) {
+        if (intervalDataDTO.getFdate() == null) {
+            bindingResult.rejectValue("fdate", "error.fdate", "Дата не может быть пустой");
+        }
+        if (intervalDataDTO.getSdate() == null) {
+            bindingResult.rejectValue("sdate", "error.sdate", "Дата не может быть пустой");
+        }
+        if (intervalDataDTO.getJsonOrCsv() == null) {
+            bindingResult.rejectValue("jsonOrCsv", "error.jsonOrCsv", "Необходимо выбрать вариант выдачи данных");
+        }
+        if (bindingResult.hasErrors()) {
+            return "mainexport";
+        }
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        model.addAttribute("fdate", dtf.format(intervalDataDTO.getFdate()));
+        model.addAttribute("sdate", dtf.format(intervalDataDTO.getSdate()));
+        if (intervalDataDTO.getJsonOrCsv()) {
+            return "apifilebackJSON";
+        } else {
+            model.addAttribute("fdate", intervalDataDTO.getFdate());
+            model.addAttribute("sdate", intervalDataDTO.getSdate());
+            model.addAttribute("devices", deviceService.findAll());
+            model.addAttribute("unitid", 1);
+            return "apifilebackCSV";
+        }
+    }
+
+    /**
+     * Обработка запроса на выдачу в JSON формате.
+     * Может использоваться параметр fileback, но он ни на что не влияет -
+     * переполз как элемент API из старого dbrobo, а так в любом случае
+     * возвращается сырой JSON.
+     */
+    @GetMapping(value = "/deb.php")
+    @ResponseBody
+    public Map<String, Entry> loadDataBetweenTextJSON
+            (@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
+             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
+        return entryService.getDataBetween(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
+                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime());
+    }
+
+    /**
+     * Обработка запроса на выдачу в CSV формате
+     */
+    @GetMapping(value = "/deb.php", params = {"manualmode"})
+    public ResponseEntity<String> loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                 LocalDateTime fdate,
+                                             @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                 LocalDateTime sdate,
+                                             @RequestParam("unitid") Long deviceId) {
+        String str = entryService.getDataBetweenCSV(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
+                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(), deviceId);
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "attachment; filename=log.csv")
+                .contentLength(str.length())
+                .header("Content-Type", "text/csv; charset=utf-8")
+                .body(str);
+    }
+
+    @GetMapping(value = "/deb.php", params = {"calibration"})
+    @ResponseBody
+    public List<Calibration> getCalibration(@RequestParam("calibration") String calibrationFlag,
+                                            @RequestParam(name = "id", required = false) Long deviceId) {
+        if (calibrationFlag.equals("full")) {
+            return calibrationService.findAll();
+        } else if (calibrationFlag.equals("filtid") && deviceId != null) {
+            return calibrationService.findByDeviceId(deviceId).map(List::of).orElse(Collections.emptyList());
+        } else throw new WrongURLException("запрос на адрес /core/deb.php имеет ошибку в параметрах calibration или id");
     }
 
     @ExceptionHandler
-    private ResponseEntity<String> handleException(WrongAKeyException e) {
-        // в HTTP ответе будет тело (String) и статус в заголовке
-        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+    private String handleException(EntryNotFoundException e, Model model) {
+        model.addAttribute("fdate", e.getFdate());
+        model.addAttribute("sdate", e.getSdate());
+        model.addAttribute("deviceId", e.getDeviceId());
+        model.addAttribute("devices", e.getAllDevices());
+        model.addAttribute("dataNotFound", e.getMessage());
+        return "apifilebackCSV";
     }
 
-    @GetMapping("/devices")
+    @ExceptionHandler
     @ResponseBody
-    public Map<Long, String> getAllDevicesInMap() {
-        return deviceService.findAllWithIdAndName();
+    private String handleNoSuchDeviceId(NoSuchElementException e) {
+        return "Прибора с таким id не найдено";
     }
 
-    @GetMapping(value = "/deb.php", params = {"fileback"})
-    public Map<String, Entry> loadDataBetweenTextJSON
-            (@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fdate,
-             @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime sdate) {
-        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
-                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
-    }
-
-    @GetMapping(value = "/deb.php", params = {"manualmode"})
-    public String loadDataBetweenCSV(@RequestParam("fdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                 LocalDateTime fdate,
-                                             @RequestParam("sdate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-                                                 LocalDateTime sdate,
-                                             @RequestParam("unitid") Long deviceId) {
-        String csv = entryService.getDataBetweenCSV(fdate, sdate, deviceId);
-        return csv;
+    @ExceptionHandler
+    @ResponseBody
+    private String handleWrongURL(WrongURLException e) {
+        return e.getMessage();
     }
 }

@@ -1,41 +1,43 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>Edit admins</title>
+    <meta charset="UTF-8">
+    <title>Edit admins</title>
 </head>
 <body>
-<a href="/admin">
-  <input type="submit" value="Назад">
+<a href="/mongo/admin">
+    <input type="submit" value="Назад">
 </a>
 <center>
-  <div>
-    <table>
-      <tr>
-        <th>ФИО пользователя</th>
-        <th>Роль пользователя</th>
-        <th>Логин пользователя</th>
-        <th>Удалить пользователя</th>
-      </tr>
-      <tr th:each="admin : ${admins}">
-        <td>
-          <a th:href="@{edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
-        </td>
-        <td th:text="${admin.getRole()}">
+    <div>
+        <table>
+            <tr>
+                <th>ФИО пользователя</th>
+                <th>Роль пользователя</th>
+                <th>Логин пользователя</th>
+                <th>Удалить пользователя</th>
+            </tr>
+            <tr th:each="admin : ${admins}">
+                <td>
+                    <a th:href="@{/mongo/admin/edit/{id}(id=${admin.getId()})}" th:text="${admin.getFio()}">admin</a>
+                </td>
+                <div th:switch="${admin.getRole()}">
+                    <td th:case="ROLE_ADMIN" th:text="Администратор"></td>
+                    <td th:case="ROLE_MODERATOR" th:text="Модератор"></td>
+                    <td th:case="ROLE_HELPER" th:text="Оператор"></td>
+                </div>
+                <td th:text="${admin.getUsername()}">
 
-        </td>
-        <td th:text="${admin.getUsername()}">
-
-        </td>
-        <td>
-          <form th:method="DELETE" th:action="@{edit/{id}(id=${admin.getId()})}">
-            <input type="submit" value="Удалить">
-          </form>
-        </td>
-      </tr>
-    </table>
-  </div>
-  <br> <a href="/admin/new">Добавить пользователя</a>
+                </td>
+                <td>
+                    <form th:method="DELETE" th:action="@{/mongo/admin/edit/{id}(id=${admin.getId()})}">
+                        <input type="submit" value="Удалить">
+                    </form>
+                </td>
+            </tr>
+        </table>
+    </div>
+<br> <a href="/mongo/admin/new">Добавить пользователя</a>
 </center>
 
 </body>

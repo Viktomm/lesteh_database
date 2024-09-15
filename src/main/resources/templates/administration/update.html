@@ -5,10 +5,10 @@
     <title>Update</title>
 </head>
 <body>
-<a href="/admin/edit">
+<a href="/mongo/admin/edit">
     <input type="submit" value="Назад">
 </a>
-<form th:method="PATCH" th:action="@{/admin/edit/{id}(id=${admin.getId()})}" >
+<form th:method="PATCH" th:action="@{/mongo/admin/edit/{id}(id=${admin.getId()})}" >
     <input type="hidden" th:field="${admin.username}">
   <label for="password">Введите новый пароль</label>
   <input type="password" th:field="${admin.password}" id="password"><br>

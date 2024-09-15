@@ -10,7 +10,6 @@ import com.mgul.dbrobo.repositories.PlaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,29 +22,26 @@ public class DeviceService {
     private final PlaceRepository placeRepository;
 
     private final EntryRepository entryRepository;
-    private final int pageSize=3;
+
+    private final CalibrationService calibrationService;
+    private final int pageSize = 10;
 
     @Autowired
-    public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository) {
+    public DeviceService(DeviceRepository deviceRepository, PlaceRepository placeRepository, EntryRepository entryRepository, CalibrationService calibrationService) {
         this.deviceRepository = deviceRepository;
         this.placeRepository = placeRepository;
         this.entryRepository = entryRepository;
-    }
-
-    public List<Long> findAllDeviceName() { return deviceRepository.findAll().stream().map(x -> x.getId()).toList();}
-
-    public Map<Long, String> findAllWithIdAndName() {
-        Map<Long, String> map = new LinkedHashMap<>();
-        deviceRepository.findAll(Sort.by("Id")).stream().forEach(x -> map.put(x.getId(), x.getName()));
-        return map;
+        this.calibrationService = calibrationService;
     }
 
     public List<Device> findAll() { return deviceRepository.findAll();}
+
     @Transactional
     public void save(Device device) {
         if (isPlaceCorrect(device.getObject())) {
             deviceRepository.insert(device);
         } else {
+            // FIXME: создать человеческое исключение на отсутствие объекта размечения
             throw new DeviceNotFoundException("No such object in database");
         }
     }
@@ -87,6 +83,9 @@ public class DeviceService {
     public List<String> getSensorsList(Long id) {
         Device device = deviceRepository.findById(id).get();
         Entry entry = entryRepository.findFirstByuNameAndSerial(device.getName(), device.getSerial());
+        if (entry == null) {
+            return calibrationService.findSensorsByUnameAndSerial(device.getName(),device.getSerial()); // Если у нас нет даты от прибора, то ищем по уже внесённым калибровочным данным
+        }
         Set<String> sensors = new TreeSet<>(entry.getData().keySet());
         sensors.removeIf(x-> x.startsWith("system"));
         sensors.removeIf(x-> x.startsWith("RTC"));
@@ -102,7 +101,7 @@ public class DeviceService {
     public List<Device> findByParams(String name, String serial, String x, String y, String object, String removed,int page) {
         List<Device> ans = getDeviceList(name, serial, x, y, object, removed);
         int startOfPage = (page-1)*pageSize;
-        int endOfPage = Math.min(startOfPage + pageSize, ans.size());
+        int endOfPage = (startOfPage+pageSize >= ans.size())? ans.size() : startOfPage+pageSize;
         return (ans.size()==0)? ans : ans.subList(startOfPage,endOfPage);
     }
 
