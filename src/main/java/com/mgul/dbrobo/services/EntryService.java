@@ -142,19 +142,19 @@ public class EntryService {
         JsonNode jsonNodeData = jsonTree.get("data");
         csvSchemaBuilder.addColumn("Date");
         jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
-        CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+        CsvSchema csvSchema = csvSchemaBuilder.build();
         CsvMapper csvMapper = new CsvMapper();
         CharArrayWriter writer = new CharArrayWriter();
         try {
             writer.write("\uFEFF");
-            String headers = csvMapper
-                    .writerFor(JsonNode.class)
-                    .with(csvSchema)
-                    .writeValueAsString(null);
-
             writer.write(String.format("Прибор: ;%s;Интервал: ;%s; / ;%s;\n", device.getName() + " (" + device.getSerial() + ")",
                     fdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")),
                     sdate.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))));
+
+            String headers = csvMapper
+                    .writerFor(JsonNode.class)
+                    .with(csvSchema.withHeader())
+                    .writeValueAsString(null);
             writer.write(headers);
         } catch (IOException ex) {throw new RuntimeException();}
 
@@ -168,18 +168,17 @@ public class EntryService {
                 str1 = csvMapper
                         .configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true)
                         .writerFor(JsonNode.class)
-                        .with(csvSchema.withoutHeader())
+                        .with(csvSchema.withoutColumns().withLineSeparator(""))
                         .writeValueAsString(jsonTree);
                 str2 = csvMapper
                         .writerFor(JsonNode.class)
-                        .with(csvSchema.withoutHeader())
+                        .with(csvSchema)
                         .writeValueAsString(jsonNodeData);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
             try {
-                writer.write(str1.replaceAll(";", "").replaceAll("\n", "")
-                        + str2.replaceAll("\\.", ","));
+                writer.write(str1 + str2); // .replaceAll("\\.", ",")
             } catch (IOException ex) {
                 throw new RuntimeException();
             }
