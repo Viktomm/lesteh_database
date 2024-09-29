@@ -87,12 +87,12 @@ public class EntryService {
                     LocalDateTime localDateTime = LocalDateTime.parse(dateTimeString, pattern);
                     entry.setDateForCalculation(localDateTime);
                 } catch (Exception e) {
-                    entry.setDate(LocalDateTime.now(ZoneId.of("Europe/Moscow")).format(pattern));
-                    entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                    entry.setDate(LocalDateTime.now(ZoneId.systemDefault()).format(pattern));
+                    entry.setDateForCalculation(LocalDateTime.now(ZoneId.systemDefault()));
                 }
             } else {
-                entry.setDate(LocalDateTime.now(ZoneId.of("Europe/Moscow")).format(pattern));
-                entry.setDateForCalculation(LocalDateTime.now(ZoneId.of("Europe/Moscow")));
+                entry.setDate(LocalDateTime.now(ZoneId.systemDefault()).format(pattern));
+                entry.setDateForCalculation(LocalDateTime.now(ZoneId.systemDefault()));
             }
             entry.setUName(deviceName);
             entry.setSerial(deviceSerial);
