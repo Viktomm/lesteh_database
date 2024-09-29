@@ -96,8 +96,8 @@ public class DataController {
     public Map<String, Entry> loadDataBetweenTextJSON
             (@RequestParam("fdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime fdate,
              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime sdate) {
-        return entryService.getDataBetween(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
-                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime());
+        return entryService.getDataBetween(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime());
     }
 
     /**
@@ -109,8 +109,8 @@ public class DataController {
                                              @RequestParam("sdate") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
                                                  LocalDateTime sdate,
                                              @RequestParam("unitid") Long deviceId) {
-        String str = entryService.getDataBetweenCSV(fdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(),
-                sdate.atZone(ZoneId.of("Europe/Moscow")).toLocalDateTime(), deviceId);
+        String str = entryService.getDataBetweenCSV(fdate.atZone(ZoneId.systemDefault()).toLocalDateTime(),
+                sdate.atZone(ZoneId.systemDefault()).toLocalDateTime(), deviceId);
         return ResponseEntity.ok()
                 .header("Content-Disposition", "attachment; filename=log.csv")
                 .contentLength(str.length())
