@@ -80,20 +80,8 @@ public class EntryService {
             DateTimeFormatter pattern = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             //TODO:боже пофиксите кто-нибудь эту дату, я не  умею((
             // твоя душа очищена, пользуйтесь DateTimeFormatter'ом всегда
-            if (entryData.containsKey("RTC")) {
-                try {
-                    String dateTimeString = entryData.get("RTC").get("date").asText() + " " + entryData.get("RTC").get("time").asText();
-                    entry.setDate(dateTimeString);
-                    LocalDateTime localDateTime = LocalDateTime.parse(dateTimeString, pattern);
-                    entry.setDateForCalculation(localDateTime);
-                } catch (Exception e) {
-                    entry.setDate(LocalDateTime.now(ZoneId.systemDefault()).format(pattern));
-                    entry.setDateForCalculation(LocalDateTime.now(ZoneId.systemDefault()));
-                }
-            } else {
-                entry.setDate(LocalDateTime.now(ZoneId.systemDefault()).format(pattern));
-                entry.setDateForCalculation(LocalDateTime.now(ZoneId.systemDefault()));
-            }
+            entry.setDate(LocalDateTime.now(ZoneId.systemDefault()).format(pattern));
+            entry.setDateForCalculation(LocalDateTime.now(ZoneId.systemDefault()));
             entry.setUName(deviceName);
             entry.setSerial(deviceSerial);
             entry.setData(newEntryData);
@@ -122,7 +110,7 @@ public class EntryService {
 
     public String getDataBetweenCSV(LocalDateTime fdate, LocalDateTime sdate, Long deviceId) {
 
-        Device device = deviceRepository.findById(deviceId).get();
+        Device device = deviceRepository.findById(deviceId).orElseThrow();
         List<Entry> result = entryRepository.findByuNameAndSerialAndDateForCalculationBetween(device.getName(), device.getSerial(), fdate, sdate);
 
         if (result.stream().findAny().isEmpty()) throw new EntryNotFoundException(fdate, sdate,
@@ -141,7 +129,7 @@ public class EntryService {
         JsonNode jsonTree = mapper.valueToTree(entryFirst);
         JsonNode jsonNodeData = jsonTree.get("data");
         csvSchemaBuilder.addColumn("Date");
-        jsonNodeData.fieldNames().forEachRemaining(field -> csvSchemaBuilder.addColumn(field));
+        jsonNodeData.fieldNames().forEachRemaining(csvSchemaBuilder::addColumn);
         CsvSchema csvSchema = csvSchemaBuilder.build();
         CsvMapper csvMapper = new CsvMapper();
         CharArrayWriter writer = new CharArrayWriter();
@@ -206,8 +194,7 @@ public class EntryService {
             ObjectMapper objectMapper = new ObjectMapper();
             InputStream in = file.getInputStream();
             ArrayList<LinkedHashMap<String, LinkedHashMap<String, JsonNode>>> payload;
-            List<LinkedHashMap<String, LinkedHashMap<String, String>>> test = new ArrayList<>();
-            payload = objectMapper.readValue(in, new TypeReference<ArrayList<LinkedHashMap<String, LinkedHashMap<String, JsonNode>>>>(){});
+            payload = objectMapper.readValue(in, new TypeReference<>(){});
             insertMany(payload);
         } catch (Exception e){
             e.printStackTrace();
